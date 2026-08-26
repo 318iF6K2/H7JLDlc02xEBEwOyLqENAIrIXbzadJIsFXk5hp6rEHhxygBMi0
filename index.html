@@ -3,96 +3,361 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Crazyben | Roblox Developer</title>
+
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
+  <!-- Background effects -->
+  <div class="background">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="grid"></div>
+  </div>
+
+  <!-- NAVIGATION -->
   <nav>
-    <a class="logo" href="#">Crazyben</a>
+    <a href="#" class="logo">CRAZYBEN</a>
+
     <div class="links">
       <a href="#projects">Projects</a>
       <a href="#about">About</a>
-      <a href="#contact">Contact Me</a>
+      <a href="#contact">Commission</a>
     </div>
   </nav>
 
+
+  <!-- HERO -->
   <header>
-    <div>
-      <h1>CRAZYBEN</h1>
-      <h2>Roblox Developer & Luau Programmer</h2>
-      <p>
-        I create Roblox gameplay systems and code using Luau.
+
+    <div class="hero-content">
+
+      <div class="status">
+        <span></span>
+        Available for commissions
+      </div>
+
+      <p class="small-title">ROBLOX DEVELOPER / LUAU PROGRAMMER</p>
+
+      <h1>
+        I BUILD
+        <span>ROBLOX</span>
+        EXPERIENCES.
+      </h1>
+
+      <p class="hero-description">
+        I create gameplay systems, mechanics and tools
+        using Luau for Roblox games.
       </p>
-      <a class="button" href="#projects">View My Work</a>
+
+      <div class="hero-buttons">
+        <a class="button primary" href="#projects">
+          View My Work
+        </a>
+
+        <a class="button secondary" href="#contact">
+          Hire Me →
+        </a>
+      </div>
+
+      <div class="stats">
+
+        <div>
+          <strong>Luau</strong>
+          <span>Primary Language</span>
+        </div>
+
+        <div>
+          <strong>Roblox</strong>
+          <span>Development</span>
+        </div>
+
+        <div>
+          <strong>2026</strong>
+          <span>Currently Active</span>
+        </div>
+
+      </div>
+
     </div>
+
   </header>
 
+
+  <!-- PROJECTS -->
   <section id="projects">
-    <h2>Projects</h2>
 
-    <div class="project">
-      <div class="placeholder">Project Screenshot</div>
-      <div>
-        <h3>Project Name</h3>
-        <p>
-          Add information about a game, system, or project you worked on here.
-        </p>
-      </div>
+    <div class="section-heading">
+      <p>MY WORK</p>
+      <h2>Featured Projects</h2>
+      <span>
+        A few things I've built with Roblox and Luau.
+      </span>
     </div>
 
-    <div class="project">
-      <div class="placeholder">Project Screenshot</div>
-      <div>
-        <h3>Project Name</h3>
-        <p>
-          Add another project and explain what you developed.
-        </p>
-      </div>
+
+    <div class="projects">
+
+
+      <article class="project featured">
+
+        <div class="project-image">
+          <div class="image-content">
+            <span>PROJECT 01</span>
+            <strong>COMBAT<br>SYSTEM</strong>
+          </div>
+        </div>
+
+        <div class="project-info">
+
+          <div class="project-number">01</div>
+
+          <h3>Advanced Combat System</h3>
+
+          <p>
+            A modular Roblox combat system featuring
+            combos, hit detection, abilities and
+            server-side validation.
+          </p>
+
+          <div class="tags">
+            <span>Luau</span>
+            <span>Roblox</span>
+            <span>Combat</span>
+          </div>
+
+          <a href="#" class="project-link">
+            View Project →
+          </a>
+
+        </div>
+
+      </article>
+
+
+      <article class="project">
+
+        <div class="project-image project-two">
+          <div class="image-content">
+            <span>PROJECT 02</span>
+            <strong>GAMEPLAY<br>SYSTEMS</strong>
+          </div>
+        </div>
+
+        <div class="project-info">
+
+          <div class="project-number">02</div>
+
+          <h3>Gameplay Framework</h3>
+
+          <p>
+            A collection of reusable gameplay systems
+            designed to make Roblox development faster
+            and more organized.
+          </p>
+
+          <div class="tags">
+            <span>Luau</span>
+            <span>Modules</span>
+            <span>Systems</span>
+          </div>
+
+          <a href="#" class="project-link">
+            View Project →
+          </a>
+
+        </div>
+
+      </article>
+
+
+      <article class="project">
+
+        <div class="project-image project-three">
+          <div class="image-content">
+            <span>PROJECT 03</span>
+            <strong>UI /<br>SYSTEMS</strong>
+          </div>
+        </div>
+
+        <div class="project-info">
+
+          <div class="project-number">03</div>
+
+          <h3>Custom UI Systems</h3>
+
+          <p>
+            Interactive interfaces and systems built
+            specifically for Roblox experiences.
+          </p>
+
+          <div class="tags">
+            <span>Luau</span>
+            <span>UI</span>
+            <span>UX</span>
+          </div>
+
+          <a href="#" class="project-link">
+            View Project →
+          </a>
+
+        </div>
+
+      </article>
+
     </div>
+
   </section>
 
-  <section id="about">
-    <h2>About Me</h2>
-    <p>
-      I'm Crazyben, a Roblox developer who specializes in coding with Luau.
-      I enjoy creating gameplay mechanics, systems, and features for Roblox games.
-    </p>
+
+  <!-- ABOUT -->
+  <section id="about" class="about">
+
+    <div class="about-card">
+
+      <div class="about-number">
+        01
+      </div>
+
+      <div>
+
+        <p class="small-title">
+          WHO I AM
+        </p>
+
+        <h2>
+          Turning ideas into
+          <span>playable systems.</span>
+        </h2>
+
+        <p class="about-text">
+          I'm Crazyben, a Roblox developer specializing
+          in Luau programming. I enjoy building gameplay
+          mechanics, systems and tools that make Roblox
+          experiences more fun and polished.
+        </p>
+
+        <div class="skills">
+
+          <div>
+            <strong>01</strong>
+            <span>Gameplay Systems</span>
+          </div>
+
+          <div>
+            <strong>02</strong>
+            <span>Luau Programming</span>
+          </div>
+
+          <div>
+            <strong>03</strong>
+            <span>UI Systems</span>
+          </div>
+
+          <div>
+            <strong>04</strong>
+            <span>Game Mechanics</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
   </section>
 
+
+  <!-- COMMISSION -->
   <section id="contact">
-    <h2>Commission Requests</h2>
-    <p>
-      Interested in working with me? Send a commission request below.
-    </p>
 
-    <p class="notice">
-      Commission requests are typically reviewed within <strong>1 day to 1 week.</strong>
-    </p>
+    <div class="commission">
 
-    <!-- Replace YOUR_FORM_ENDPOINT with a form service endpoint -->
-    <form action="YOUR_FORM_ENDPOINT" method="POST">
-      <label>
-        Name
-        <input type="text" name="name" required>
-      </label>
+      <div class="commission-text">
 
-      <label>
-        Email or Discord
-        <input type="text" name="contact" required>
-      </label>
+        <p class="small-title">
+          LET'S WORK TOGETHER
+        </p>
 
-      <label>
-        What do you need?
-        <textarea name="details" rows="6" required></textarea>
-      </label>
+        <h2>
+          Have a project
+          <span>in mind?</span>
+        </h2>
 
-      <button type="submit">Send Commission Request</button>
-    </form>
+        <p>
+          Send me the details of your project and I'll
+          get back to you as soon as possible.
+        </p>
+
+        <div class="response">
+          <span>●</span>
+          Usually responds within 1 day – 1 week
+        </div>
+
+      </div>
+
+
+      <form action="YOUR_FORM_ENDPOINT" method="POST">
+
+        <label>
+          Your Name
+          <input
+            type="text"
+            name="name"
+            placeholder="Crazyben"
+            required
+          >
+        </label>
+
+        <label>
+          Email or Discord
+          <input
+            type="text"
+            name="contact"
+            placeholder="username@example.com"
+            required
+          >
+        </label>
+
+        <label>
+          Tell me about your project
+          <textarea
+            name="details"
+            rows="6"
+            placeholder="What would you like me to build?"
+            required
+          ></textarea>
+        </label>
+
+        <button type="submit">
+          Send Commission Request →
+        </button>
+
+      </form>
+
+    </div>
+
   </section>
 
+
+  <!-- FOOTER -->
   <footer>
-    <p>© 2026 Crazyben</p>
+
+    <div class="footer-logo">
+      CRAZYBEN
+    </div>
+
+    <p>
+      Roblox Developer & Luau Programmer
+    </p>
+
+    <span>
+      © 2026 Crazyben. Built with HTML & CSS.
+    </span>
+
   </footer>
 
 </body>
