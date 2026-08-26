@@ -1,460 +1,99 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-:root {
-  --bg: #07090f;
-  --bg-2: #0c101a;
-  --card: rgba(18, 23, 36, 0.75);
-  --border: rgba(255, 255, 255, 0.09);
-  --text: #f4f7ff;
-  --muted: #9ba6bb;
-  --accent: #7c5cff;
-  --accent-2: #00d9ff;
-  --glow: rgba(124, 92, 255, 0.35);
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: "Inter", sans-serif;
-  background:
-    radial-gradient(circle at 20% 10%, rgba(124, 92, 255, 0.16), transparent 30%),
-    radial-gradient(circle at 80% 30%, rgba(0, 217, 255, 0.08), transparent 25%),
-    var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-  overflow-x: hidden;
-}
-
-/* ---------- NAV ---------- */
-
-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 72px;
-  padding: 0 8%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  z-index: 100;
-
-  background: rgba(7, 9, 15, 0.7);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid var(--border);
-}
-
-.logo {
-  color: white;
-  text-decoration: none;
-  font-size: 1.3rem;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-}
-
-.logo::before {
-  content: "<";
-  color: var(--accent);
-}
-
-.logo::after {
-  content: "/>";
-  color: var(--accent-2);
-}
-
-.links {
-  display: flex;
-  gap: 32px;
-}
-
-.links a {
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 600;
-  transition: 0.25s ease;
-}
-
-.links a:hover {
-  color: white;
-}
-
-/* ---------- HERO ---------- */
-
-header {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  padding: 120px 8% 80px;
-  position: relative;
-}
-
-header::before {
-  content: "";
-  position: absolute;
-  width: 450px;
-  height: 450px;
-  background: var(--accent);
-  filter: blur(150px);
-  opacity: 0.12;
-  top: 20%;
-  right: 5%;
-  pointer-events: none;
-}
-
-header > div {
-  max-width: 850px;
-}
-
-header h1 {
-  font-size: clamp(4rem, 11vw, 9rem);
-  line-height: 0.9;
-  letter-spacing: -0.08em;
-  font-weight: 800;
-
-  background: linear-gradient(
-    120deg,
-    #ffffff 20%,
-    #9b8cff 55%,
-    #00d9ff
-  );
-
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-
-  animation: fadeUp 0.8s ease forwards;
-}
-
-header h2 {
-  margin-top: 25px;
-  font-size: clamp(1.2rem, 3vw, 2rem);
-  color: #dbe1ef;
-  font-weight: 600;
-  animation: fadeUp 0.8s 0.1s ease both;
-}
-
-header p {
-  max-width: 550px;
-  margin: 20px 0 32px;
-  color: var(--muted);
-  font-size: 1.05rem;
-  animation: fadeUp 0.8s 0.2s ease both;
-}
-
-/* ---------- BUTTON ---------- */
-
-.button {
-  display: inline-flex;
-  padding: 14px 24px;
-  border-radius: 12px;
-
-  color: white;
-  text-decoration: none;
-  font-weight: 700;
-
-  background: linear-gradient(
-    135deg,
-    var(--accent),
-    #5e8cff
-  );
-
-  box-shadow:
-    0 10px 30px var(--glow),
-    inset 0 1px rgba(255, 255, 255, 0.2);
-
-  transition: 0.25s ease;
-  animation: fadeUp 0.8s 0.3s ease both;
-}
-
-.button:hover {
-  transform: translateY(-3px);
-  box-shadow:
-    0 15px 40px var(--glow),
-    inset 0 1px rgba(255, 255, 255, 0.3);
-}
-
-/* ---------- SECTIONS ---------- */
-
-section {
-  max-width: 1100px;
-  margin: auto;
-  padding: 110px 30px;
-}
-
-section > h2 {
-  font-size: 2.5rem;
-  letter-spacing: -0.04em;
-  margin-bottom: 40px;
-}
-
-section > h2::after {
-  content: "";
-  display: block;
-  width: 45px;
-  height: 4px;
-  margin-top: 12px;
-  border-radius: 5px;
-  background: linear-gradient(
-    90deg,
-    var(--accent),
-    var(--accent-2)
-  );
-}
-
-/* ---------- PROJECTS ---------- */
-
-.project {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 35px;
-  align-items: center;
-
-  padding: 24px;
-  margin-bottom: 25px;
-
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-
-  backdrop-filter: blur(12px);
-
-  transition:
-    transform 0.3s ease,
-    border-color 0.3s ease,
-    box-shadow 0.3s ease;
-}
-
-.project:hover {
-  transform: translateY(-6px);
-  border-color: rgba(124, 92, 255, 0.5);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-}
-
-.placeholder {
-  min-height: 230px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 14px;
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(124, 92, 255, 0.2),
-      rgba(0, 217, 255, 0.08)
-    );
-
-  border: 1px solid var(--border);
-  color: #8894aa;
-  font-weight: 600;
-
-  position: relative;
-  overflow: hidden;
-}
-
-.placeholder::before {
-  content: "";
-  position: absolute;
-  width: 200%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.08),
-    transparent
-  );
-  transform: translateX(-100%);
-  animation: shine 4s infinite;
-}
-
-.project h3 {
-  font-size: 1.6rem;
-  margin-bottom: 10px;
-}
-
-.project p {
-  color: var(--muted);
-}
-
-/* ---------- ABOUT ---------- */
-
-#about {
-  text-align: center;
-  max-width: 850px;
-}
-
-#about > h2::after {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-#about p {
-  color: var(--muted);
-  font-size: 1.1rem;
-}
-
-/* ---------- CONTACT ---------- */
-
-#contact {
-  max-width: 800px;
-}
-
-#contact > p {
-  color: var(--muted);
-}
-
-.notice {
-  margin: 20px 0;
-  padding: 15px 18px;
-
-  border-left: 3px solid var(--accent);
-  background: rgba(124, 92, 255, 0.08);
-  border-radius: 8px;
-}
-
-form {
-  margin-top: 35px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-label {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-input,
-textarea {
-  width: 100%;
-  padding: 14px 16px;
-
-  border: 1px solid var(--border);
-  border-radius: 10px;
-
-  background: rgba(255, 255, 255, 0.04);
-  color: white;
-
-  font: inherit;
-  outline: none;
-
-  transition: 0.2s ease;
-}
-
-input:focus,
-textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.12);
-}
-
-textarea {
-  resize: vertical;
-}
-
-button {
-  padding: 15px 20px;
-  border: none;
-  border-radius: 11px;
-
-  background: linear-gradient(
-    135deg,
-    var(--accent),
-    #5e8cff
-  );
-
-  color: white;
-  font: inherit;
-  font-weight: 700;
-
-  cursor: pointer;
-
-  box-shadow: 0 10px 30px var(--glow);
-  transition: 0.25s ease;
-}
-
-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 15px 40px var(--glow);
-}
-
-/* ---------- FOOTER ---------- */
-
-footer {
-  padding: 35px;
-  text-align: center;
-  border-top: 1px solid var(--border);
-  color: #68738a;
-  font-size: 0.85rem;
-}
-
-/* ---------- ANIMATIONS ---------- */
-
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes shine {
-  0% {
-    transform: translateX(-100%);
-  }
-
-  50%,
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-/* ---------- MOBILE ---------- */
-
-@media (max-width: 700px) {
-  nav {
-    padding: 0 5%;
-  }
-
-  .links {
-    gap: 15px;
-  }
-
-  .links a {
-    font-size: 0.78rem;
-  }
-
-  header {
-    padding-left: 5%;
-    padding-right: 5%;
-  }
-
-  section {
-    padding: 80px 5%;
-  }
-
-  .project {
-    grid-template-columns: 1fr;
-  }
-
-  .placeholder {
-    min-height: 180px;
-  }
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crazyben | Roblox Developer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav>
+    <a class="logo" href="#">Crazyben</a>
+    <div class="links">
+      <a href="#projects">Projects</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact Me</a>
+    </div>
+  </nav>
+
+  <header>
+    <div>
+      <h1>CRAZYBEN</h1>
+      <h2>Roblox Developer & Luau Programmer</h2>
+      <p>
+        I create Roblox gameplay systems and code using Luau.
+      </p>
+      <a class="button" href="#projects">View My Work</a>
+    </div>
+  </header>
+
+  <section id="projects">
+    <h2>Projects</h2>
+
+    <div class="project">
+      <div class="placeholder">Project Screenshot</div>
+      <div>
+        <h3>Project Name</h3>
+        <p>
+          Add information about a game, system, or project you worked on here.
+        </p>
+      </div>
+    </div>
+
+    <div class="project">
+      <div class="placeholder">Project Screenshot</div>
+      <div>
+        <h3>Project Name</h3>
+        <p>
+          Add another project and explain what you developed.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <h2>About Me</h2>
+    <p>
+      I'm Crazyben, a Roblox developer who specializes in coding with Luau.
+      I enjoy creating gameplay mechanics, systems, and features for Roblox games.
+    </p>
+  </section>
+
+  <section id="contact">
+    <h2>Commission Requests</h2>
+    <p>
+      Interested in working with me? Send a commission request below.
+    </p>
+
+    <p class="notice">
+      Commission requests are typically reviewed within <strong>1 day to 1 week.</strong>
+    </p>
+
+    <!-- Replace YOUR_FORM_ENDPOINT with a form service endpoint -->
+    <form action="YOUR_FORM_ENDPOINT" method="POST">
+      <label>
+        Name
+        <input type="text" name="name" required>
+      </label>
+
+      <label>
+        Email or Discord
+        <input type="text" name="contact" required>
+      </label>
+
+      <label>
+        What do you need?
+        <textarea name="details" rows="6" required></textarea>
+      </label>
+
+      <button type="submit">Send Commission Request</button>
+    </form>
+  </section>
+
+  <footer>
+    <p>© 2026 Crazyben</p>
+  </footer>
+
+</body>
+</html>
