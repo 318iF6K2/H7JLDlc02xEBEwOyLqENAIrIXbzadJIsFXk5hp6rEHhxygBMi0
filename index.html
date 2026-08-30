@@ -1,363 +1,376 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crazyben Games</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
 
-  <title>Crazyben | Roblox Developer</title>
+    body {
+      background-color: #1a1a1a;
+      color: #ffffff;
+    }
 
-  <link rel="stylesheet" href="style.css">
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* Header Navigation */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background-color: rgba(20, 26, 36, 0.95);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 5%;
+      border-bottom: 1px solid #2a3444;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    .logo img {
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 25px;
+    }
+
+    nav a {
+      font-size: 0.9rem;
+      font-weight: bold;
+      transition: color 0.2s;
+    }
+
+    nav a:hover {
+      color: #c0392b;
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), #111;
+      background-size: cover;
+      background-position: center;
+      padding: 80px 5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .hero-text {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .hero-text h1 {
+      font-size: 2.8rem;
+      letter-spacing: 2px;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+    }
+
+    .hero-text p {
+      color: #cccccc;
+      font-size: 1.1rem;
+      line-height: 1.5;
+    }
+
+    .hero-media {
+      flex: 1;
+      min-width: 300px;
+      max-width: 550px;
+      border: 3px solid #333;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    }
+
+    .hero-media img {
+      width: 100%;
+      display: block;
+    }
+
+    /* Sub-Header Banner */
+    .sub-banner {
+      background-color: #2c3e50;
+      text-align: center;
+      padding: 20px;
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+
+    /* Featured Section */
+    .featured {
+      background-color: #555555;
+      text-align: center;
+      padding: 60px 10%;
+    }
+
+    .featured h2 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+
+    .featured p {
+      max-width: 800px;
+      margin: 0 auto 30px auto;
+      line-height: 1.6;
+      font-size: 1.1rem;
+      color: #e0e0e0;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: #c0392b;
+      color: white;
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .btn:hover {
+      background-color: #e74c3c;
+      transform: translateY(-2px);
+    }
+
+    /* Game Showcase Grid */
+    .games-section {
+      background-color: #eef2f5;
+      color: #333;
+      padding: 60px 5%;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 25px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .game-card {
+      background: #ffffff;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      padding-bottom: 20px;
+    }
+
+    .game-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .game-card h3 {
+      margin-top: 15px;
+      font-size: 1.2rem;
+    }
+
+    .game-card .date {
+      font-size: 0.8rem;
+      color: #777;
+      margin-bottom: 12px;
+    }
+
+    .game-card p {
+      font-size: 0.9rem;
+      color: #555;
+      padding: 0 15px;
+      line-height: 1.4;
+      flex-grow: 1;
+      margin-bottom: 20px;
+    }
+
+    /* Call to Action Banner */
+    .cta-banner {
+      background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), #222;
+      padding: 50px 10%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .cta-banner h2 {
+      font-size: 2.2rem;
+    }
+
+    .cta-banner p {
+      color: #aaa;
+    }
+
+    /* Social Footer */
+    footer {
+      background-color: #2c3e50;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    footer h3 {
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .social-icon {
+      width: 40px;
+      height: 40px;
+      border: 2px solid white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+
+    .social-icon:hover {
+      background-color: rgba(255,255,255,0.2);
+    }
+
+    .copyright {
+      font-size: 0.8rem;
+      color: #bdc3c7;
+    }
+  </style>
 </head>
-
 <body>
 
-  <!-- Background effects -->
-  <div class="background">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="grid"></div>
-  </div>
-
-  <!-- NAVIGATION -->
-  <nav>
-    <a href="#" class="logo">CRAZYBEN</a>
-
-    <div class="links">
-      <a href="#projects">Projects</a>
-      <a href="#about">About</a>
-      <a href="#contact">Commission</a>
-    </div>
-  </nav>
-
-
-  <!-- HERO -->
+  <!-- Navigation -->
   <header>
-
-    <div class="hero-content">
-
-      <div class="status">
-        <span></span>
-        Available for commissions
-      </div>
-
-      <p class="small-title">ROBLOX DEVELOPER / LUAU PROGRAMMER</p>
-
-      <h1>
-        I BUILD
-        <span>ROBLOX</span>
-        EXPERIENCES.
-      </h1>
-
-      <p class="hero-description">
-        I create gameplay systems, mechanics and tools
-        using Luau for Roblox games.
-      </p>
-
-      <div class="hero-buttons">
-        <a class="button primary" href="#projects">
-          View My Work
-        </a>
-
-        <a class="button secondary" href="#contact">
-          Hire Me →
-        </a>
-      </div>
-
-      <div class="stats">
-
-        <div>
-          <strong>Luau</strong>
-          <span>Primary Language</span>
-        </div>
-
-        <div>
-          <strong>Roblox</strong>
-          <span>Development</span>
-        </div>
-
-        <div>
-          <strong>2026</strong>
-          <span>Currently Active</span>
-        </div>
-
-      </div>
-
+    <div class="logo">
+      <img src="https://via.placeholder.com/32" alt="Logo">
+      <span>Crazyben Games</span>
     </div>
-
+    <nav>
+      <ul>
+        <li><a href="#">ROBLOX Profile</a></li>
+        <li><a href="#">Discord</a></li>
+        <li><a href="#">Forum</a></li>
+        <li><a href="#">Contact Me</a></li>
+      </ul>
+    </nav>
   </header>
 
-
-  <!-- PROJECTS -->
-  <section id="projects">
-
-    <div class="section-heading">
-      <p>MY WORK</p>
-      <h2>Featured Projects</h2>
-      <span>
-        A few things I've built with Roblox and Luau.
-      </span>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Crazyben Games</h1>
+      <p>An independent developer focused on creating games based around inherently fun core mechanics!</p>
     </div>
-
-
-    <div class="projects">
-
-
-      <article class="project featured">
-
-        <div class="project-image">
-          <div class="image-content">
-            <span>PROJECT 01</span>
-            <strong>COMBAT<br>SYSTEM</strong>
-          </div>
-        </div>
-
-        <div class="project-info">
-
-          <div class="project-number">01</div>
-
-          <h3>Advanced Combat System</h3>
-
-          <p>
-            A modular Roblox combat system featuring
-            combos, hit detection, abilities and
-            server-side validation.
-          </p>
-
-          <div class="tags">
-            <span>Luau</span>
-            <span>Roblox</span>
-            <span>Combat</span>
-          </div>
-
-          <a href="#" class="project-link">
-            View Project →
-          </a>
-
-        </div>
-
-      </article>
-
-
-      <article class="project">
-
-        <div class="project-image project-two">
-          <div class="image-content">
-            <span>PROJECT 02</span>
-            <strong>GAMEPLAY<br>SYSTEMS</strong>
-          </div>
-        </div>
-
-        <div class="project-info">
-
-          <div class="project-number">02</div>
-
-          <h3>Gameplay Framework</h3>
-
-          <p>
-            A collection of reusable gameplay systems
-            designed to make Roblox development faster
-            and more organized.
-          </p>
-
-          <div class="tags">
-            <span>Luau</span>
-            <span>Modules</span>
-            <span>Systems</span>
-          </div>
-
-          <a href="#" class="project-link">
-            View Project →
-          </a>
-
-        </div>
-
-      </article>
-
-
-      <article class="project">
-
-        <div class="project-image project-three">
-          <div class="image-content">
-            <span>PROJECT 03</span>
-            <strong>UI /<br>SYSTEMS</strong>
-          </div>
-        </div>
-
-        <div class="project-info">
-
-          <div class="project-number">03</div>
-
-          <h3>Custom UI Systems</h3>
-
-          <p>
-            Interactive interfaces and systems built
-            specifically for Roblox experiences.
-          </p>
-
-          <div class="tags">
-            <span>Luau</span>
-            <span>UI</span>
-            <span>UX</span>
-          </div>
-
-          <a href="#" class="project-link">
-            View Project →
-          </a>
-
-        </div>
-
-      </article>
-
+    <div class="hero-media">
+      <img src="https://via.placeholder.com/550x300" alt="Featured Preview">
     </div>
-
   </section>
 
+  <!-- Banner -->
+  <div class="sub-banner">
+    Developed by Crazyben Games:
+  </div>
 
-  <!-- ABOUT -->
-  <section id="about" class="about">
-
-    <div class="about-card">
-
-      <div class="about-number">
-        01
-      </div>
-
-      <div>
-
-        <p class="small-title">
-          WHO I AM
-        </p>
-
-        <h2>
-          Turning ideas into
-          <span>playable systems.</span>
-        </h2>
-
-        <p class="about-text">
-          I'm Crazyben, a Roblox developer specializing
-          in Luau programming. I enjoy building gameplay
-          mechanics, systems and tools that make Roblox
-          experiences more fun and polished.
-        </p>
-
-        <div class="skills">
-
-          <div>
-            <strong>01</strong>
-            <span>Gameplay Systems</span>
-          </div>
-
-          <div>
-            <strong>02</strong>
-            <span>Luau Programming</span>
-          </div>
-
-          <div>
-            <strong>03</strong>
-            <span>UI Systems</span>
-          </div>
-
-          <div>
-            <strong>04</strong>
-            <span>Game Mechanics</span>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- COMMISSION -->
-  <section id="contact">
-
-    <div class="commission">
-
-      <div class="commission-text">
-
-        <p class="small-title">
-          LET'S WORK TOGETHER
-        </p>
-
-        <h2>
-          Have a project
-          <span>in mind?</span>
-        </h2>
-
-        <p>
-          Send me the details of your project and I'll
-          get back to you as soon as possible.
-        </p>
-
-        <div class="response">
-          <span>●</span>
-          Usually responds within 1 day – 1 week
-        </div>
-
-      </div>
-
-
-      <form action="YOUR_FORM_ENDPOINT" method="POST">
-
-        <label>
-          Your Name
-          <input
-            type="text"
-            name="name"
-            placeholder="Crazyben"
-            required
-          >
-        </label>
-
-        <label>
-          Email or Discord
-          <input
-            type="text"
-            name="contact"
-            placeholder="username@example.com"
-            required
-          >
-        </label>
-
-        <label>
-          Tell me about your project
-          <textarea
-            name="details"
-            rows="6"
-            placeholder="What would you like me to build?"
-            required
-          ></textarea>
-        </label>
-
-        <button type="submit">
-          Send Commission Request →
-        </button>
-
-      </form>
-
-    </div>
-
-  </section>
-
-
-  <!-- FOOTER -->
-  <footer>
-
-    <div class="footer-logo">
-      CRAZYBEN
-    </div>
-
+  <!-- Featured Game -->
+  <section class="featured">
+    <h2>Main Project Title</h2>
     <p>
-      Roblox Developer & Luau Programmer
+      This is a showcase of your main Roblox game. Describe your featured project, its key mechanics, unique gameplay elements, and why players love it.
     </p>
+    <a href="#" class="btn">Play on ROBLOX</a>
+  </section>
 
-    <span>
-      © 2026 Crazyben. Built with HTML & CSS.
-    </span>
+  <!-- Game Showcase Grid -->
+  <section class="games-section">
+    <div class="games-grid">
+      
+      <div class="game-card">
+        <img src="https://via.placeholder.com/300x160" alt="Game 1">
+        <h3>Game One</h3>
+        <div class="date">January 2024</div>
+        <p>Short description of your first game title, highlighting its gameplay features and player stats.</p>
+        <div><a href="#" class="btn">Visit Game Page</a></div>
+      </div>
 
+      <div class="game-card">
+        <img src="https://via.placeholder.com/300x160" alt="Game 2">
+        <h3>Game Two</h3>
+        <div class="date">June 2024</div>
+        <p>Short description of your second game title and what makes it fun to play with friends.</p>
+        <div><a href="#" class="btn">Visit Game Page</a></div>
+      </div>
+
+      <div class="game-card">
+        <img src="https://via.placeholder.com/300x160" alt="Game 3">
+        <h3>Game Three</h3>
+        <div class="date">December 2024</div>
+        <p>Short description of your third project focusing on unique mechanics and open world maps.</p>
+        <div><a href="#" class="btn">Visit Game Page</a></div>
+      </div>
+
+      <div class="game-card">
+        <img src="https://via.placeholder.com/300x160" alt="Game 4">
+        <h3>Game Four</h3>
+        <div class="date">2025</div>
+        <p>Short description of your latest game or sequel featuring updated mechanics and maps.</p>
+        <div><a href="#" class="btn">Visit Game Page</a></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="cta-banner">
+    <div>
+      <p>Get involved with the community and see what's new!</p>
+      <h2>Join our Forum</h2>
+    </div>
+    <a href="#" class="btn">Visit Forum</a>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <h3>Follow Crazyben Games</h3>
+    <div class="social-links">
+      <a href="#" class="social-icon">X</a>
+      <a href="#" class="social-icon">f</a>
+      <a href="#" class="social-icon">YT</a>
+    </div>
+    <div class="copyright">
+      Copyright &copy; 2026 Crazyben Games
+    </div>
   </footer>
 
 </body>
