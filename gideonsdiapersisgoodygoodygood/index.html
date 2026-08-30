@@ -1,184 +1,307 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Five Nights at Stuarts 2</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Five Nights At Stuarts 2</title>
   <link rel="icon" type="image/png" href="CSNew4.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Creepster&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      user-select: none;
+    /* ─────────── RESET ─────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; background: #000; font-family: 'Oswald', sans-serif; overflow: hidden; }
+    body { cursor: default; }
+
+    /* ─────────── STATIC OVERLAYS ─────────── */
+    #noise, #scanlines, #vignette { position: fixed; inset: 0; pointer-events: none; z-index: 9; }
+    #noise { opacity: 0.035; }
+    #scanlines { background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0,0,0,0.17) 2px 4px); z-index: 10; }
+    #vignette { background: radial-gradient(circle at center, transparent 55%, rgba(0,0,0,0.82) 100%); z-index: 11; }
+
+    /* ─────────── TITLE BLOCK (LEFT) ─────────── */
+    .title-block { 
+      position: absolute; 
+      top: 12%; 
+      left: 6%; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 0.2em; 
+      z-index: 20; 
+      animation: titleFlicker 7s steps(1,end) infinite; 
+    }
+    @keyframes titleFlicker { 0%, 97%, 100% { opacity: 1; } 98% { opacity: 0.78; } 99% { opacity: 1; } }
+    .title-line { 
+      font-family: 'Creepster', cursive; 
+      font-size: clamp(42px, 7vw, 96px); 
+      color: #6bb3ff; 
+      letter-spacing: 0.04em; 
+      text-shadow: 0 0 34px rgba(80,150,255,0.85), 3px 3px 0 #042354; 
+    }
+    .title-num { 
+      font-family: 'Creepster', cursive; 
+      font-size: clamp(110px, 17vw, 220px); 
+      line-height: 0.8; 
+      color: #2f7bff; 
+      transform: translateX(-8%); 
+      text-shadow: 0 0 50px rgba(70,140,255,0.55); 
     }
 
-    body {
-      background-color: #000000;
-      color: #ffffff;
-      min-height: 100vh;
-      width: 100vw;
-      overflow: hidden;
+    /* ─────────── MENU OPTIONS (BOTTOM-LEFT) ─────────── */
+    #menu { 
+      position: absolute; 
+      bottom: 10%; 
+      left: 6%; 
+      list-style: none; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+      z-index: 20; 
+    }
+    #menu li { 
       position: relative;
+      font-size: clamp(18px, 2.6vw, 32px); 
+      letter-spacing: 0.45em; 
+      text-transform: uppercase; 
+      color: #143256; 
+      transition: all 0.16s ease; 
+      user-select: none; 
+    }
+    #menu li.active { color: #8bc4ff; }
+    #menu li.active:hover, #menu li.selected { 
+      color: #cfe4ff; 
+      text-shadow: 0 0 12px rgba(140,190,255,0.9); 
+      cursor: pointer; 
+    }
+    #menu li.inactive { color: #0f2138; cursor: not-allowed; }
+    #menu li.selected::before { 
+      content: '▶'; 
+      position: absolute; 
+      left: -1.6em; 
+      color: #cfe4ff; 
+      animation: blinkArrow 0.7s steps(1,end) infinite; 
+    }
+    @keyframes blinkArrow { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* ─────────── HINT / COPYRIGHT (BOTTOM-RIGHT) ─────────── */
+    #hint { 
+      position: absolute; 
+      bottom: 4%; 
+      right: 6%; 
+      font-size: clamp(10px, 1.1vw, 14px); 
+      letter-spacing: 0.25em; 
+      color: #13325c; 
+      z-index: 20; 
+      text-align: right; 
     }
 
-    /* Menu Container */
-    .menu-container {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 60px 8%;
-      z-index: 2;
+    /* ─────────── STUART SILHOUETTE (RIGHT) ─────────── */
+    .stuart-silhouette { 
+      position: absolute; 
+      bottom: -5%; 
+      right: -2%; 
+      width: 50vw; 
+      max-width: 680px; 
+      opacity: 0.55; 
+      filter: brightness(0.55) sepia(0.6) hue-rotate(-170deg) saturate(1.8) drop-shadow(0 0 45px rgba(80,130,255,0.45)); 
+      pointer-events: none; 
+      z-index: 12; 
     }
 
-    /* Game Title Styling */
-    .title-section {
-      margin-top: 20px;
+    /* ─────────── FLASH TRANSITION ─────────── */
+    #flash { 
+      position: fixed; 
+      inset: 0; 
+      background: #fff; 
+      pointer-events: none; 
+      opacity: 0; 
+      z-index: 100; 
+      transition: opacity 0.05s; 
     }
 
-    .title-text {
-      font-size: 3.8rem;
-      font-weight: 900;
-      line-height: 1.1;
-      letter-spacing: 2px;
-      color: #3b82f6;
-      text-transform: uppercase;
-      text-shadow: 0 0 12px rgba(59, 130, 246, 0.6),
-                   0 0 24px rgba(59, 130, 246, 0.3);
-    }
-
-    .title-number {
-      font-size: 5.5rem;
-      font-weight: 900;
-      color: #3b82f6;
-      margin-top: 10px;
-      text-shadow: 0 0 15px rgba(59, 130, 246, 0.7);
-    }
-
-    /* Menu Options */
-    .options-section {
-      margin-bottom: 40px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .menu-btn {
-      background: none;
-      border: none;
-      color: #ffffff;
-      font-size: 1.3rem;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      text-align: left;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      transition: color 0.2s, text-shadow 0.2s;
-    }
-
-    .menu-btn::before {
-      content: '';
-      display: inline-block;
-      width: 0;
-      height: 0;
-      border-top: 8px solid transparent;
-      border-bottom: 8px solid transparent;
-      border-left: 12px solid transparent;
-      transition: border-left-color 0.2s;
-    }
-
-    .menu-btn:hover {
-      color: #60a5fa;
-      text-shadow: 0 0 8px rgba(96, 165, 250, 0.8);
-    }
-
-    .menu-btn:hover::before {
-      border-left-color: #60a5fa;
-    }
-
-    /* Bottom Character Image Overlay */
-    .character-overlay {
-      position: absolute;
-      bottom: -20px;
-      right: 4%;
-      height: 75vh;
-      max-height: 650px;
-      z-index: 1;
-      pointer-events: none;
-      filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.35)) brightness(0.7) contrast(1.1);
-    }
-
-    .character-overlay img {
-      height: 100%;
-      width: auto;
-      display: block;
-    }
-
-    /* Subtle static vignette effect */
-    .vignette {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.85) 100%);
-      pointer-events: none;
-      z-index: 3;
-    }
-
-    /* Mobile adjustments */
-    @media (max-width: 768px) {
-      .title-text {
-        font-size: 2.5rem;
-      }
-      .title-number {
-        font-size: 4rem;
-      }
-      .character-overlay {
-        height: 50vh;
-        right: -10%;
-      }
+    /* ─────────── SECRET VIDEO ─────────── */
+    #secret-vid { 
+      position: fixed; 
+      inset: 0; 
+      width: 100%; 
+      height: 100%; 
+      object-fit: contain; 
+      z-index: 200; 
+      background: #000; 
+      display: none; 
     }
   </style>
 </head>
 <body>
+  <canvas id="noise"></canvas>
+  <div id="scanlines"></div>
+  <div id="vignette"></div>
 
-  <div class="vignette"></div>
-
-  <main class="menu-container">
-    <div class="title-section">
-      <h1 class="title-text">Five Nights<br>at Stuarts</h1>
-      <div class="title-number">2</div>
-    </div>
-
-    <div class="options-section">
-      <button class="menu-btn" onclick="startGame()">New Game</button>
-      <button class="menu-btn" onclick="continueGame()">Continue</button>
-    </div>
-  </main>
-
-  <div class="character-overlay">
-    <img src="image_d92a66.png" alt="Stuart Character" />
+  <div class="title-block">
+    <div class="title-line">FIVE NIGHTS</div>
+    <div class="title-line">AT STUARTS</div>
+    <div class="title-num">2</div>
   </div>
 
+  <ul id="menu">
+    <li id="menu-new" class="active selected">New Game</li>
+    <li id="menu-continue" class="inactive">Continue</li>
+  </ul>
+
+  <div id="hint">PRESS & HOLD DELETE TO RESET DATA</div>
+
+  <img src="image_d92a66.png" alt="Stuart silhouette" class="stuart-silhouette">
+
+  <div id="flash"></div>
+
+  <video id="secret-vid" src="crucifix.mp4" playsinline></video>
+
+  <audio id="menu-music" src="menu_music.mp3" loop></audio>
+
   <script>
-    function startGame() {
-      // Redirect or launch game logic here
-      console.log("Starting new game...");
+    /* ────── NOISE CANVAS ────── */
+    const noiseCanvas = document.getElementById('noise');
+    const nCtx = noiseCanvas.getContext('2d');
+    function sizeNoise() { noiseCanvas.width = innerWidth; noiseCanvas.height = innerHeight; }
+    sizeNoise(); 
+    addEventListener('resize', sizeNoise);
+    
+    function drawNoise() {
+      const { width: w, height: h } = noiseCanvas;
+      const id = nCtx.createImageData(w, h);
+      for (let i = 0; i < id.data.length; i += 4) {
+        const v = Math.random() * 255;
+        id.data[i] = id.data[i+1] = id.data[i+2] = v;
+        id.data[i+3] = 255;
+      }
+      nCtx.putImageData(id, 0, 0);
+    }
+    setInterval(drawNoise, 90);
+
+    /* ────── MENU LOGIC ────── */
+    const newBtn = document.getElementById('menu-new');
+    const contBtn = document.getElementById('menu-continue');
+    const flash = document.getElementById('flash');
+    const menuItems = [newBtn, contBtn];
+    let sel = 0;
+
+    function updateMenu() {
+      menuItems.forEach((li, i) => li.classList.toggle('selected', i === sel));
     }
 
-    function continueGame() {
-      // Load saved state logic here
-      console.log("Continuing game...");
+    addEventListener('keydown', e => {
+      if (secretActive) return; // ignore during secret video
+      if (['ArrowUp', 'w', 'W'].includes(e.key)) {
+        sel = (sel - 1 + menuItems.length) % menuItems.length;
+        updateMenu();
+      }
+      if (['ArrowDown', 's', 'S'].includes(e.key)) {
+        sel = (sel + 1) % menuItems.length;
+        updateMenu();
+      }
+      if (e.key === 'Enter' || e.key === ' ') {
+        activate(menuItems[sel]);
+      }
+      if (e.key === 'Delete') {
+        holdReset = true;
+      }
+    });
+
+    addEventListener('keyup', e => {
+      if (e.key === 'Delete') {
+        holdReset = false;
+        resetHold = 0;
+      }
+    });
+
+    menuItems.forEach(li => li.addEventListener('mouseover', () => {
+      sel = menuItems.indexOf(li);
+      updateMenu();
+    }));
+
+    menuItems.forEach(li => li.addEventListener('click', () => activate(li)));
+
+    function activate(li) {
+      if (li.id === 'menu-new') {
+        transition(() => location.href = 'game.html');
+      } else if (li.id === 'menu-continue' && li.classList.contains('active')) {
+        const n = contBtn.dataset.night || 1;
+        transition(() => location.href = `game.html?night=${n}`);
+      }
+    }
+
+    function transition(cb) {
+      flash.style.opacity = '1';
+      setTimeout(cb, 140);
+    }
+
+    /* continue save */
+    const saved = parseInt(localStorage.getItem('fnafSaveNight') || '0');
+    if (saved > 1) {
+      contBtn.classList.remove('inactive');
+      contBtn.classList.add('active');
+      contBtn.dataset.night = saved;
+    }
+
+    /* reset data by holding Delete */
+    let holdReset = false, resetHold = 0;
+    setInterval(() => {
+      if (holdReset) {
+        resetHold += 100;
+        if (resetHold > 2000) {
+          localStorage.removeItem('fnafSaveNight');
+          location.reload();
+        }
+      } else {
+        resetHold = 0;
+      }
+    }, 100);
+
+    /* ────── AMBIENT MUSIC ────── */
+    const music = document.getElementById('menu-music');
+    music.volume = 0.45;
+    music.play().catch(() => {
+      const starter = () => {
+        music.play().catch(() => {});
+        removeEventListener('click', starter);
+        removeEventListener('keydown', starter);
+      };
+      addEventListener('click', starter);
+      addEventListener('keydown', starter);
+    });
+
+    /* ────── SECRET WORD TRIGGER ────── */
+    const secretVid = document.getElementById('secret-vid');
+    let keyBuffer = '';
+    let secretActive = false;
+
+    addEventListener('keydown', e => {
+      if (secretActive) return; // ignore while video playing
+      if (e.key.length === 1) {
+        keyBuffer += e.key.toLowerCase();
+        if (keyBuffer.length > 6) keyBuffer = keyBuffer.slice(-6);
+        if (keyBuffer === 'stuart') triggerSecret();
+      }
+    });
+
+    function triggerSecret() {
+      secretActive = true;
+      music.pause();
+      Array.from(document.body.children).forEach(el => {
+        if (el.id !== 'secret-vid') el.style.display = 'none';
+      });
+      secretVid.style.display = 'block';
+      secretVid.currentTime = 0;
+      secretVid.play().catch(() => {});
+      secretVid.onended = () => {
+        Array.from(document.body.children).forEach(el => {
+          if (el.id !== 'secret-vid') el.style.display = '';
+        });
+        secretVid.style.display = 'none';
+        secretActive = false;
+        music.play().catch(() => {});
+        keyBuffer = '';
+      };
     }
   </script>
-
 </body>
 </html>
