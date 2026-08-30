@@ -190,6 +190,14 @@
       box-shadow: 0 6px 16px rgba(0, 180, 216, 0.5);
     }
 
+    .btn.disabled {
+      background: #4a5568;
+      color: #a0aec0;
+      box-shadow: none;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
     /* Game Showcase Grid */
     .games-section {
       background-color: #f0f8ff;
@@ -346,9 +354,9 @@
   <header id="mainHeader">
     <nav>
       <ul>
-        <li><a href="#">Roblox Profile</a></li>
-        <li><a href="#">Discord</a></li>
-        <li><a href="#">Skygaze Studio</a></li>
+        <li><a href="https://www.roblox.com/users/946447734/profile" target="_blank">Roblox Profile</a></li>
+        <li><a href="https://discord.gg/XgdCf2AfPU" target="_blank">Discord</a></li>
+        <li><a href="https://www.roblox.com/communities/5077085" target="_blank">Skygaze Studio</a></li>
         <li><a href="#">Commissions</a></li>
       </ul>
     </nav>
@@ -360,7 +368,7 @@
       <div class="hero-brand">
         <img src="CrazybenLogo.png" alt="Crazyben Logo" class="hero-title-img">
       </div>
-      <p class="bio">Coding with <strong>Luau</strong> since 2019. Founder of <strong>Skygaze Studio</strong>. I'm mostly known for my little projects and for working on <strong>THE FOUNDATON: Legacy</strong>. (we don't talk about that)</p>
+      <p class="bio">Coding with <strong>Luau</strong> since 2019. Founder of <strong>Skygaze Studio</strong>. I'm mostly known for my little projects and for working on <strong>THE FOUNDATON: Legacy</strong> (we don't talk about that).</p>
     </div>
     <div class="hero-media">
       <img src="https://cdn.discordapp.com/attachments/1508893295441477743/1543715982038794240/Me.png?ex=6a95e10a&is=6a948f8a&hm=0f620e5296a2a49967a9f9e611bae442337507c9c58a12597a9325ad37f495ab&?text=Me" alt="Hey! That's me!">
@@ -377,7 +385,7 @@
     <p>
       Skygaze Studio is a Roblox game studio that was founded by Crazyben in 2019. We have a really big project planned for the coming months but we can't disclose it at this time.
     </p>
-    <a href="#" class="btn">Join Group</a>
+    <a href="https://www.roblox.com/communities/5077085" target="_blank" class="btn">Join Group</a>
   </section>
 
   <section class="games-section">
@@ -387,33 +395,33 @@
         <div class="card-icon-header">
           <img src="CSNew4Black.png" alt="Game Icon" class="card-icon">
         </div>
-        <img src="https://via.placeholder.com/300x160/0077b6/ffffff?text=Game+1" alt="Game 1" class="preview">
-        <h3>Skygaze Game One</h3>
-        <div class="date">RELEASED 2024</div>
-        <p>Short description of game mechanics, goals, or level updates.</p>
-        <div><a href="#" class="btn">Visit Game Page</a></div>
+        <img src="https://via.placeholder.com/300x160/0077b6/ffffff?text=Aqua+Evade" alt="Aqua Evade" class="preview">
+        <h3>Aqua Evade</h3>
+        <div class="date">RELEASED AUGUST 14, 2023</div>
+        <p>A modified version of Open Flood Test and essentially a copy of Flood Escape 2 (steak played it in early 2024). A remake started on April Fools 2025, though progress has since slowed.</p>
+        <div><a href="https://www.roblox.com/games/13727360570/" target="_blank" class="btn">Visit Game Page</a></div>
       </div>
 
       <div class="game-card">
         <div class="card-icon-header">
           <img src="CSNew4Black.png" alt="Game Icon" class="card-icon">
         </div>
-        <img src="https://via.placeholder.com/300x160/0077b6/ffffff?text=Game+2" alt="Game 2" class="preview">
-        <h3>Skygaze Game Two</h3>
-        <div class="date">RELEASED 2025</div>
-        <p>Short description highlighting gameplay and player mechanics.</p>
-        <div><a href="#" class="btn">Visit Game Page</a></div>
+        <img src="https://via.placeholder.com/300x160/0077b6/ffffff?text=THE+FOUNDATION:+Legacy" alt="THE FOUNDATION: Legacy" class="preview">
+        <h3>THE FOUNDATION: Legacy</h3>
+        <div class="date">RELEASED JANUARY 17, 2026</div>
+        <p>A remake of the DOORS fangame "blue build". It was taken down on August 2, 2026 after its anti-decompile system was falsely detected as malicious code by Roblox AI moderation.</p>
+        <div><a href="https://www.youtube.com/playlist?list=PLPm5JIflKUyBTg4z7WZMjFai8M_0ZHg9K" target="_blank" class="btn">Watch Archive</a></div>
       </div>
 
       <div class="game-card">
         <div class="card-icon-header">
           <img src="CSNew4Black.png" alt="Game Icon" class="card-icon">
         </div>
-        <img src="https://via.placeholder.com/300x160/0077b6/ffffff?text=Game+3" alt="Game 3" class="preview">
-        <h3>Upcoming Project</h3>
+        <img src="https://via.placeholder.com/300x160/0077b6/ffffff?text=Upcoming+DOORS+Fangame" alt="Upcoming DOORS Fangame" class="preview">
+        <h3>Upcoming DOORS Fangame</h3>
         <div class="date">IN DEVELOPMENT</div>
-        <p>Sneak peek at what Crazyben & Skygaze Studio are currently working on.</p>
-        <div><a href="#" class="btn">Visit Game Page</a></div>
+        <p>Skygaze Studio has been working on a brand new DOORS Fangame behind the scenes. Official details will be released in the coming months.</p>
+        <div><a href="#" class="btn disabled" tabindex="-1">Coming Soon</a></div>
       </div>
 
     </div>
@@ -424,7 +432,7 @@
       <p>Get involved with the Skygaze community and see what's new!</p>
       <h2>Join our Community</h2>
     </div>
-    <a href="#" class="btn">Visit Forum</a>
+    <a href="https://discord.gg/XgdCf2AfPU" target="_blank" class="btn">Join Discord</a>
   </section>
 
   <footer>
@@ -433,9 +441,8 @@
       <h3>Follow Skygaze Studio</h3>
     </div>
     <div class="social-links">
-      <a href="#" class="social-icon">X</a>
-      <a href="#" class="social-icon">d</a>
-      <a href="#" class="social-icon">YT</a>
+      <a href="https://discord.gg/XgdCf2AfPU" target="_blank" class="social-icon">d</a>
+      <a href="https://www.roblox.com/communities/5077085" target="_blank" class="social-icon">R$</a>
     </div>
     <div class="copyright">
       Copyright &copy; 2026 Skygaze Studio & Crazyben
