@@ -17,7 +17,7 @@
             cursor: none;
         }
 
-        /* ── RESTORED MAIN MENU STYLES ── */
+        /* ── MAIN MENU OVERLAY ── */
         #main-menu {
             position: fixed;
             inset: 0;
@@ -27,34 +27,22 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: #fff;
-            text-align: center;
-        }
-
-        #main-menu h1 {
-            font-family: 'Creepster', cursive;
-            font-size: clamp(36px, 5vw, 80px);
-            color: #800;
-            margin-bottom: 30px;
-            letter-spacing: 2px;
         }
 
         .menu-btn {
-            background: transparent;
-            border: 2px solid #800;
+            background: none;
+            border: 2px solid #fff;
             color: #fff;
             font-family: 'Oswald', sans-serif;
-            font-size: clamp(18px, 2vw, 28px);
-            padding: 12px 36px;
+            font-size: 24px;
+            padding: 10px 30px;
             margin: 10px;
             cursor: pointer;
-            letter-spacing: 2px;
-            transition: background 0.2s ease, color 0.2s ease;
         }
 
         .menu-btn:hover {
-            background: #800;
-            color: #fff;
+            background: #fff;
+            color: #000;
         }
 
         /* ── GAME CONTAINER ── */
@@ -219,7 +207,6 @@
     <audio id="menu-music" src="menu_music.mp3" loop></audio>
 
     <div id="main-menu">
-        <h1>FIVE NIGHTS AT STUARTS</h1>
         <button class="menu-btn" id="start-game-btn">NEW GAME</button>
         <button class="menu-btn" id="continue-game-btn">CONTINUE</button>
     </div>
@@ -331,7 +318,7 @@
             gameOver: document.getElementById('game-over-screen')
         };
 
-        // Attempt music playback on first interaction
+        // Play music on click to pass browser autoplay security policies
         window.addEventListener('click', () => {
             if (!STATE.gameStarted && DOM.menuMusic.paused) {
                 DOM.menuMusic.play().catch(() => {});
