@@ -17,6 +17,54 @@
             cursor: none;
         }
 
+        /* ── MAIN MENU STYLES ── */
+        #main-menu {
+            position: fixed;
+            inset: 0;
+            background: #000 url('title_bg.png') center/cover no-repeat;
+            z-index: 500;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-left: 8vw;
+            color: #fff;
+        }
+
+        #main-menu h1 {
+            font-family: 'Creepster', cursive;
+            font-size: clamp(40px, 6vw, 90px);
+            color: #b30000;
+            text-shadow: 3px 3px 10px #000;
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-family: 'Oswald', sans-serif;
+            font-size: clamp(20px, 3vw, 36px);
+            text-align: left;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.2s ease;
+            width: fit-content;
+        }
+
+        .menu-btn:hover {
+            color: #fff;
+            transform: translateX(10px);
+            text-shadow: 0 0 8px rgba(255,255,255,0.8);
+        }
+
+        /* ── GAME CONTAINER ── */
+        #game-container {
+            position: absolute;
+            inset: 0;
+            display: none; /* Hidden until New Game / Continue is clicked */
+        }
+
         /* ── ROOM WRAPPER ── */
         #room-wrapper {
             position: absolute;
@@ -163,63 +211,73 @@
         #cursor {
             position: fixed; width: 16px; height: 16px;
             border: 2px solid rgba(255,255,255,0.8); border-radius: 50%;
-            pointer-events: none; z-index: 300; transform: translate(-50%, -50%);
+            pointer-events: none; z-index: 600; transform: translate(-50%, -50%);
         }
     </style>
 </head>
 <body>
 
-    <div id="room-wrapper">
-        <img id="room-img" src="room.png" alt="Office">
-        <div id="camera-btn"></div>
+    <audio id="menu-music" src="menu_music.mp3" loop></audio>
+
+    <div id="main-menu">
+        <h1>FIVE NIGHTS AT STUARTS</h1>
+        <button class="menu-btn" id="start-game-btn">NEW GAME</button>
+        <button class="menu-btn" id="continue-game-btn">CONTINUE</button>
     </div>
 
-    <img id="peek-left" class="peek-zone" src="bonnie.png" alt="Left Vent Animatronic">
-    <img id="peek-right" class="peek-zone" src="chica.png" alt="Right Vent Animatronic">
-    <img id="peek-center" class="peek-zone" src="freddy.png" alt="Hallway Animatronic">
+    <div id="game-container">
+        <div id="room-wrapper">
+            <img id="room-img" src="room.png" alt="Office">
+            <div id="camera-btn"></div>
+        </div>
 
-    <div id="dark-overlay"></div>
-    <div id="vignette"></div>
-    <div id="scanlines"></div>
-    <div id="mask-overlay"></div>
+        <img id="peek-left" class="peek-zone" src="bonnie.png" alt="Left Vent Animatronic">
+        <img id="peek-right" class="peek-zone" src="chica.png" alt="Right Vent Animatronic">
+        <img id="peek-center" class="peek-zone" src="freddy.png" alt="Hallway Animatronic">
 
-    <div id="hud-container">
-        <div id="time-display">12 AM</div>
-        <div id="night-display">NIGHT 1</div>
-    </div>
-    <div id="flashlight-hud">
-        POWER
-        <div id="flashlight-bar-bg"><div id="flashlight-bar-fill"></div></div>
-    </div>
+        <div id="dark-overlay"></div>
+        <div id="vignette"></div>
+        <div id="scanlines"></div>
+        <div id="mask-overlay"></div>
 
-    <div id="hover-mask-trigger">MASK</div>
-    <div id="hover-cam-trigger">MONITOR</div>
+        <div id="hud-container">
+            <div id="time-display">12 AM</div>
+            <div id="night-display">NIGHT 1</div>
+        </div>
+        <div id="flashlight-hud">
+            POWER
+            <div id="flashlight-bar-bg"><div id="flashlight-bar-fill"></div></div>
+        </div>
 
-    <div id="camera-ui">
-        <div id="cam-feed">
-            <img id="cam-feed-img" src="" alt="Camera Feed">
-            <div id="cam-label">CAM 11 - PRIZE CORNER</div>
-            <button id="wind-music-box">WIND MUSIC BOX</button>
-            
-            <div id="cam-map">
-                <svg viewBox="0 0 300 250" width="260" height="200">
-                    <g class="map-room" data-cam="09"><rect x="210" y="20" width="70" height="30"/><text x="245" y="38" class="map-id">CAM 09</text></g>
-                    <g class="map-room" data-cam="10"><rect x="210" y="75" width="70" height="30"/><text x="245" y="93" class="map-id">CAM 10</text></g>
-                    <g class="map-room active" data-cam="11"><rect x="210" y="130" width="70" height="30"/><text x="245" y="148" class="map-id">CAM 11</text></g>
-                    <g class="map-room" data-cam="12"><rect x="210" y="185" width="70" height="30"/><text x="245" y="203" class="map-id">CAM 12</text></g>
-                    <g class="map-room" data-cam="07"><rect x="115" y="25" width="70" height="40"/><text x="150" y="48" class="map-id">CAM 07</text></g>
-                    <g class="map-room" data-cam="08"><rect x="115" y="90" width="70" height="40"/><text x="150" y="113" class="map-id">CAM 08</text></g>
-                    <g class="map-room" data-cam="01"><rect x="20" y="20" width="70" height="30"/><text x="55" y="38" class="map-id">CAM 01</text></g>
-                    <g class="map-room" data-cam="02"><rect x="20" y="75" width="70" height="30"/><text x="55" y="93" class="map-id">CAM 02</text></g>
-                    <g class="map-room" data-cam="05"><rect x="90" y="210" width="50" height="25"/><text x="115" y="226" class="map-id">CAM 05</text></g>
-                    <g class="map-room" data-cam="06"><rect x="160" y="210" width="50" height="25"/><text x="185" y="226" class="map-id">CAM 06</text></g>
-                </svg>
+        <div id="hover-mask-trigger">MASK</div>
+        <div id="hover-cam-trigger">MONITOR</div>
+
+        <div id="camera-ui">
+            <div id="cam-feed">
+                <img id="cam-feed-img" src="" alt="Camera Feed">
+                <div id="cam-label">CAM 11 - PRIZE CORNER</div>
+                <button id="wind-music-box">WIND MUSIC BOX</button>
+                
+                <div id="cam-map">
+                    <svg viewBox="0 0 300 250" width="260" height="200">
+                        <g class="map-room" data-cam="09"><rect x="210" y="20" width="70" height="30"/><text x="245" y="38" class="map-id">CAM 09</text></g>
+                        <g class="map-room" data-cam="10"><rect x="210" y="75" width="70" height="30"/><text x="245" y="93" class="map-id">CAM 10</text></g>
+                        <g class="map-room active" data-cam="11"><rect x="210" y="130" width="70" height="30"/><text x="245" y="148" class="map-id">CAM 11</text></g>
+                        <g class="map-room" data-cam="12"><rect x="210" y="185" width="70" height="30"/><text x="245" y="203" class="map-id">CAM 12</text></g>
+                        <g class="map-room" data-cam="07"><rect x="115" y="25" width="70" height="40"/><text x="150" y="48" class="map-id">CAM 07</text></g>
+                        <g class="map-room" data-cam="08"><rect x="115" y="90" width="70" height="40"/><text x="150" y="113" class="map-id">CAM 08</text></g>
+                        <g class="map-room" data-cam="01"><rect x="20" y="20" width="70" height="30"/><text x="55" y="38" class="map-id">CAM 01</text></g>
+                        <g class="map-room" data-cam="02"><rect x="20" y="75" width="70" height="30"/><text x="55" y="93" class="map-id">CAM 02</text></g>
+                        <g class="map-room" data-cam="05"><rect x="90" y="210" width="50" height="25"/><text x="115" y="226" class="map-id">CAM 05</text></g>
+                        <g class="map-room" data-cam="06"><rect x="160" y="210" width="50" height="25"/><text x="185" y="226" class="map-id">CAM 06</text></g>
+                    </svg>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div id="jumpscare-overlay"><img id="jumpscare-img" src="" alt="Jumpscare"></div>
-    <div id="game-over-screen">GAME OVER</div>
+        <div id="jumpscare-overlay"><img id="jumpscare-img" src="" alt="Jumpscare"></div>
+        <div id="game-over-screen">GAME OVER</div>
+    </div>
 
     <div id="cursor"></div>
 
@@ -236,6 +294,7 @@
             currentCam: '11',
             musicBox: 100,
             gameOver: false,
+            gameStarted: false,
             panX: -90
         };
 
@@ -250,6 +309,11 @@
 
         // Core DOM Handles
         const DOM = {
+            mainMenu: document.getElementById('main-menu'),
+            gameContainer: document.getElementById('game-container'),
+            menuMusic: document.getElementById('menu-music'),
+            startBtn: document.getElementById('start-game-btn'),
+            continueBtn: document.getElementById('continue-game-btn'),
             roomWrapper: document.getElementById('room-wrapper'),
             roomImg: document.getElementById('room-img'),
             cursor: document.getElementById('cursor'),
@@ -268,12 +332,34 @@
             gameOver: document.getElementById('game-over-screen')
         };
 
+        // Attempt menu audio playback on initial user interaction to bypass browser autoplay policies
+        window.addEventListener('click', () => {
+            if (!STATE.gameStarted && DOM.menuMusic.paused) {
+                DOM.menuMusic.play().catch(() => {});
+            }
+        }, { once: true });
+
+        // Start Game Handler
+        function startGame() {
+            STATE.gameStarted = true;
+            DOM.menuMusic.pause();
+            DOM.menuMusic.currentTime = 0;
+            DOM.mainMenu.style.display = 'none';
+            DOM.gameContainer.style.display = 'block';
+            
+            // Start main game loops
+            initGameLoops();
+        }
+
+        DOM.startBtn.addEventListener('click', startGame);
+        DOM.continueBtn.addEventListener('click', startGame);
+
         // Performance Throttled Panorama Pan Mechanism
         window.addEventListener('mousemove', (e) => {
             DOM.cursor.style.left = `${e.clientX}px`;
             DOM.cursor.style.top = `${e.clientY}px`;
             
-            if(!STATE.isCamOpen && !STATE.gameOver) {
+            if(STATE.gameStarted && !STATE.isCamOpen && !STATE.gameOver) {
                 const percent = e.clientX / window.innerWidth;
                 STATE.panX = -30 - (percent * 120);
                 DOM.roomWrapper.style.transform = `translateX(${STATE.panX}vw) scale(0.6)`;
@@ -282,6 +368,7 @@
 
         // Flashlight Toggle Logic
         window.addEventListener('keydown', (e) => {
+            if (!STATE.gameStarted) return;
             if (e.code === 'ControlLeft' || e.code === 'ControlRight' || e.code === 'KeyF') {
                 if (STATE.flashPower > 0 && !STATE.isMaskOn) {
                     STATE.isFlashOn = true;
@@ -291,6 +378,7 @@
         });
 
         window.addEventListener('keyup', (e) => {
+            if (!STATE.gameStarted) return;
             if (e.code === 'ControlLeft' || e.code === 'ControlRight' || e.code === 'KeyF') {
                 STATE.isFlashOn = false;
                 updateLighting();
@@ -310,14 +398,14 @@
 
         // Mask & Camera Triggers
         document.getElementById('hover-cam-trigger').addEventListener('mouseenter', () => {
-            if (STATE.isMaskOn || STATE.gameOver) return;
+            if (!STATE.gameStarted || STATE.isMaskOn || STATE.gameOver) return;
             STATE.isCamOpen = !STATE.isCamOpen;
             DOM.camUi.classList.toggle('open', STATE.isCamOpen);
             updateCameraFeed();
         });
 
         document.getElementById('hover-mask-trigger').addEventListener('mouseenter', () => {
-            if (STATE.isCamOpen || STATE.gameOver) return;
+            if (!STATE.gameStarted || STATE.isCamOpen || STATE.gameOver) return;
             STATE.isMaskOn = !STATE.isMaskOn;
             DOM.mask.classList.toggle('on', STATE.isMaskOn);
             renderOfficePeeks();
@@ -344,7 +432,6 @@
 
         function updateCameraFeed() {
             if (!STATE.isCamOpen) return;
-            // Sets feed display path based on state
             DOM.camImg.src = `cam_${STATE.currentCam}.png`;
         }
 
@@ -356,57 +443,53 @@
             DOM.peekCenter.style.display = (lit && AI.WitheredFoxy.pos === 'hallway') ? 'block' : 'none';
         }
 
-        // Accurate FNAF 2 Opportunity Timer Execution Loop (Every 5 seconds)
-        setInterval(() => {
-            if (STATE.gameOver) return;
+        // Game Loop Initializer
+        function initGameLoops() {
+            // Opportunity Timer Loop (Every 5 seconds)
+            setInterval(() => {
+                if (STATE.gameOver || !STATE.gameStarted) return;
 
-            // Process Animatronic Movements
-            Object.keys(AI).forEach(key => {
-                const char = AI[key];
-                if (!char.path) return;
+                Object.keys(AI).forEach(key => {
+                    const char = AI[key];
+                    if (!char.path) return;
 
-                const roll = Math.floor(Math.random() * 20) + 1;
-                if (roll <= char.level) {
-                    let currentIndex = char.path.indexOf(char.pos);
-                    if (currentIndex < char.path.length - 1) {
-                        char.pos = char.path[currentIndex + 1];
+                    const roll = Math.floor(Math.random() * 20) + 1;
+                    if (roll <= char.level) {
+                        let currentIndex = char.path.indexOf(char.pos);
+                        if (currentIndex < char.path.length - 1) {
+                            char.pos = char.path[currentIndex + 1];
+                        }
                     }
+                });
+
+                checkOfficeIntrusions();
+            }, 4970);
+
+            // Sub-second Loop (Time & Mechanics)
+            setInterval(() => {
+                if (STATE.gameOver || !STATE.gameStarted) return;
+
+                STATE.timeTicks++;
+                if (STATE.timeTicks % 60 === 0) {
+                    STATE.hour = (STATE.hour + 1) % 12;
+                    DOM.timeDisplay.textContent = `${STATE.hour === 0 ? 12 : STATE.hour} AM`;
                 }
-            });
 
-            // Check Aggro and Office Intrusion Logic
-            checkOfficeIntrusions();
-        }, 4970);
+                STATE.musicBox = Math.max(0, STATE.musicBox - 0.15);
+                if (STATE.musicBox <= 0) {
+                    triggerJumpscare('puppet.png');
+                }
 
-        // Sub-second Engine Loop for Time and Mechanics
-        setInterval(() => {
-            if (STATE.gameOver) return;
+                if (STATE.isFlashOn) updateLighting();
 
-            // Time progression
-            STATE.timeTicks++;
-            if (STATE.timeTicks % 60 === 0) {
-                STATE.hour = (STATE.hour + 1) % 12;
-                DOM.timeDisplay.textContent = `${STATE.hour === 0 ? 12 : STATE.hour} AM`;
-            }
-
-            // Drain Music Box
-            STATE.musicBox = Math.max(0, STATE.musicBox - 0.15);
-            if (STATE.musicBox <= 0) {
-                triggerJumpscare('puppet.png');
-            }
-
-            // Deplete Flashlight when active
-            if (STATE.isFlashOn) updateLighting();
-
-        }, 1000);
+            }, 1000);
+        }
 
         function checkOfficeIntrusions() {
-            // Withered Foxy Check (Requires Flashlight, Mask does not block)
             if (AI.WitheredFoxy.pos === 'hallway' && !STATE.isFlashOn && Math.random() < 0.3) {
                 triggerJumpscare('foxy.png');
             }
 
-            // Vent Animatronics Check (Blocked by Mask)
             ['ToyBonnie', 'ToyChica'].forEach(name => {
                 const anim = AI[name];
                 if (anim.pos === 'office_vent') {
@@ -414,7 +497,6 @@
                         if (!STATE.isMaskOn) {
                             triggerJumpscare(`${name.toLowerCase()}.png`);
                         } else {
-                            // Successfully warded off
                             anim.pos = anim.path[0];
                             renderOfficePeeks();
                         }
