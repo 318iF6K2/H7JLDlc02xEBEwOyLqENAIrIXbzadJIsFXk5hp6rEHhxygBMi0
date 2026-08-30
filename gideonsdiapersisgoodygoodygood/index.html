@@ -17,52 +17,51 @@
             cursor: none;
         }
 
-        /* ── MAIN MENU STYLES ── */
+        /* ── RESTORED MAIN MENU STYLES ── */
         #main-menu {
             position: fixed;
             inset: 0;
-            background: #000 url('title_bg.png') center/cover no-repeat;
+            background: #000;
             z-index: 500;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding-left: 8vw;
+            align-items: center;
             color: #fff;
+            text-align: center;
         }
 
         #main-menu h1 {
             font-family: 'Creepster', cursive;
-            font-size: clamp(40px, 6vw, 90px);
-            color: #b30000;
-            text-shadow: 3px 3px 10px #000;
-            margin-bottom: 20px;
-            line-height: 1.1;
+            font-size: clamp(36px, 5vw, 80px);
+            color: #800;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
         }
 
         .menu-btn {
-            background: none;
-            border: none;
-            color: #888;
+            background: transparent;
+            border: 2px solid #800;
+            color: #fff;
             font-family: 'Oswald', sans-serif;
-            font-size: clamp(20px, 3vw, 36px);
-            text-align: left;
-            margin: 10px 0;
+            font-size: clamp(18px, 2vw, 28px);
+            padding: 12px 36px;
+            margin: 10px;
             cursor: pointer;
-            transition: color 0.2s ease, transform 0.2s ease;
-            width: fit-content;
+            letter-spacing: 2px;
+            transition: background 0.2s ease, color 0.2s ease;
         }
 
         .menu-btn:hover {
+            background: #800;
             color: #fff;
-            transform: translateX(10px);
-            text-shadow: 0 0 8px rgba(255,255,255,0.8);
         }
 
         /* ── GAME CONTAINER ── */
         #game-container {
             position: absolute;
             inset: 0;
-            display: none; /* Hidden until New Game / Continue is clicked */
+            display: none;
         }
 
         /* ── ROOM WRAPPER ── */
@@ -332,14 +331,14 @@
             gameOver: document.getElementById('game-over-screen')
         };
 
-        // Attempt menu audio playback on initial user interaction to bypass browser autoplay policies
+        // Attempt music playback on first interaction
         window.addEventListener('click', () => {
             if (!STATE.gameStarted && DOM.menuMusic.paused) {
                 DOM.menuMusic.play().catch(() => {});
             }
         }, { once: true });
 
-        // Start Game Handler
+        // Start Game & Stop Music
         function startGame() {
             STATE.gameStarted = true;
             DOM.menuMusic.pause();
@@ -347,7 +346,6 @@
             DOM.mainMenu.style.display = 'none';
             DOM.gameContainer.style.display = 'block';
             
-            // Start main game loops
             initGameLoops();
         }
 
@@ -443,9 +441,8 @@
             DOM.peekCenter.style.display = (lit && AI.WitheredFoxy.pos === 'hallway') ? 'block' : 'none';
         }
 
-        // Game Loop Initializer
+        // Game Loops
         function initGameLoops() {
-            // Opportunity Timer Loop (Every 5 seconds)
             setInterval(() => {
                 if (STATE.gameOver || !STATE.gameStarted) return;
 
@@ -465,7 +462,6 @@
                 checkOfficeIntrusions();
             }, 4970);
 
-            // Sub-second Loop (Time & Mechanics)
             setInterval(() => {
                 if (STATE.gameOver || !STATE.gameStarted) return;
 
