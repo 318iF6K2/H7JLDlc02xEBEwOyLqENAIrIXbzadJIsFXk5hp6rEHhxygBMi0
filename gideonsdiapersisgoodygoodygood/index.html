@@ -1,307 +1,438 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Five Nights At Stuarts 2</title>
-  <link rel="icon" type="image/png" href="CSNew4.png" />
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Creepster&display=swap" rel="stylesheet">
-  <style>
-    /* ─────────── RESET ─────────── */
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; background: #000; font-family: 'Oswald', sans-serif; overflow: hidden; }
-    body { cursor: default; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Five Nights At Stuarts - FNAF 2 Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            font-family: 'Oswald', sans-serif;
+            user-select: none;
+            cursor: none;
+        }
 
-    /* ─────────── STATIC OVERLAYS ─────────── */
-    #noise, #scanlines, #vignette { position: fixed; inset: 0; pointer-events: none; z-index: 9; }
-    #noise { opacity: 0.035; }
-    #scanlines { background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0,0,0,0.17) 2px 4px); z-index: 10; }
-    #vignette { background: radial-gradient(circle at center, transparent 55%, rgba(0,0,0,0.82) 100%); z-index: 11; }
+        /* ── ROOM WRAPPER ── */
+        #room-wrapper {
+            position: absolute;
+            top: 0; left: 0;
+            width: 280vw; height: 100vh;
+            transform: translateX(-90vw) scale(0.6);
+            transition: transform 0.2s cubic-bezier(0.1, 0.4, 0.2, 1);
+            will-change: transform;
+        }
+        #room-img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            filter: brightness(0.2);
+            transition: filter 0.05s ease-out;
+        }
+        #room-img.lit { filter: brightness(0.85); }
 
-    /* ─────────── TITLE BLOCK (LEFT) ─────────── */
-    .title-block { 
-      position: absolute; 
-      top: 12%; 
-      left: 6%; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 0.2em; 
-      z-index: 20; 
-      animation: titleFlicker 7s steps(1,end) infinite; 
-    }
-    @keyframes titleFlicker { 0%, 97%, 100% { opacity: 1; } 98% { opacity: 0.78; } 99% { opacity: 1; } }
-    .title-line { 
-      font-family: 'Creepster', cursive; 
-      font-size: clamp(42px, 7vw, 96px); 
-      color: #6bb3ff; 
-      letter-spacing: 0.04em; 
-      text-shadow: 0 0 34px rgba(80,150,255,0.85), 3px 3px 0 #042354; 
-    }
-    .title-num { 
-      font-family: 'Creepster', cursive; 
-      font-size: clamp(110px, 17vw, 220px); 
-      line-height: 0.8; 
-      color: #2f7bff; 
-      transform: translateX(-8%); 
-      text-shadow: 0 0 50px rgba(70,140,255,0.55); 
-    }
+        /* ── OFFICE ELEMENTS ── */
+        #camera-btn {
+            position: absolute;
+            left: 50%; top: 28%;
+            width: 9%; height: 30%;
+            cursor: none; z-index: 8;
+        }
 
-    /* ─────────── MENU OPTIONS (BOTTOM-LEFT) ─────────── */
-    #menu { 
-      position: absolute; 
-      bottom: 10%; 
-      left: 6%; 
-      list-style: none; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 10px; 
-      z-index: 20; 
-    }
-    #menu li { 
-      position: relative;
-      font-size: clamp(18px, 2.6vw, 32px); 
-      letter-spacing: 0.45em; 
-      text-transform: uppercase; 
-      color: #143256; 
-      transition: all 0.16s ease; 
-      user-select: none; 
-    }
-    #menu li.active { color: #8bc4ff; }
-    #menu li.active:hover, #menu li.selected { 
-      color: #cfe4ff; 
-      text-shadow: 0 0 12px rgba(140,190,255,0.9); 
-      cursor: pointer; 
-    }
-    #menu li.inactive { color: #0f2138; cursor: not-allowed; }
-    #menu li.selected::before { 
-      content: '▶'; 
-      position: absolute; 
-      left: -1.6em; 
-      color: #cfe4ff; 
-      animation: blinkArrow 0.7s steps(1,end) infinite; 
-    }
-    @keyframes blinkArrow { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        /* ── OVERLAYS ── */
+        #vignette {
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at center, transparent 38%, rgba(0,0,0,0.85) 100%);
+            pointer-events: none; z-index: 5;
+        }
+        #scanlines {
+            position: absolute; inset: 0;
+            background: repeating-linear-gradient(to bottom, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px);
+            pointer-events: none; z-index: 6;
+        }
+        #dark-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.4);
+            pointer-events: none; z-index: 3;
+        }
 
-    /* ─────────── HINT / COPYRIGHT (BOTTOM-RIGHT) ─────────── */
-    #hint { 
-      position: absolute; 
-      bottom: 4%; 
-      right: 6%; 
-      font-size: clamp(10px, 1.1vw, 14px); 
-      letter-spacing: 0.25em; 
-      color: #13325c; 
-      z-index: 20; 
-      text-align: right; 
-    }
+        /* ── VENTS & HALLWAY PEEKS ── */
+        .peek-zone {
+            position: fixed; top: 20vh; height: 60vh; width: 18%;
+            z-index: 4; pointer-events: none; display: none;
+            object-fit: contain;
+        }
+        #peek-left { left: 10vw; }
+        #peek-right { right: 10vw; }
+        #peek-center { left: 41vw; width: 18vw; height: 40vh; top: 30vh; }
 
-    /* ─────────── STUART SILHOUETTE (RIGHT) ─────────── */
-    .stuart-silhouette { 
-      position: absolute; 
-      bottom: -5%; 
-      right: -2%; 
-      width: 50vw; 
-      max-width: 680px; 
-      opacity: 0.55; 
-      filter: brightness(0.55) sepia(0.6) hue-rotate(-170deg) saturate(1.8) drop-shadow(0 0 45px rgba(80,130,255,0.45)); 
-      pointer-events: none; 
-      z-index: 12; 
-    }
+        /* ── MASK SYSTEM ── */
+        #mask-overlay {
+            position: fixed; inset: 0; z-index: 45;
+            background: url('freddy_mask.png') center/cover no-repeat;
+            pointer-events: none; transform: translateY(-100%);
+            transition: transform 0.25s ease-out;
+        }
+        #mask-overlay.on { transform: translateY(0); }
 
-    /* ─────────── FLASH TRANSITION ─────────── */
-    #flash { 
-      position: fixed; 
-      inset: 0; 
-      background: #fff; 
-      pointer-events: none; 
-      opacity: 0; 
-      z-index: 100; 
-      transition: opacity 0.05s; 
-    }
+        /* ── HUD ELEMENTS ── */
+        #hud-container {
+            position: fixed; top: 4vh; right: 3vw; z-index: 60;
+            text-align: right; pointer-events: none;
+            color: #e8e8c8; text-shadow: 0 0 8px rgba(0,0,0,0.95);
+        }
+        #time-display { font-size: clamp(20px, 2.6vw, 40px); font-weight: 700; }
+        #night-display { font-size: clamp(11px, 1.3vw, 20px); color: rgba(210,210,185,0.65); }
+        #flashlight-hud {
+            position: fixed; bottom: 4vh; left: 3vw; z-index: 60;
+            color: #e8e8c8; font-size: clamp(14px, 1.5vw, 22px);
+        }
+        #flashlight-bar-bg {
+            width: 120px; height: 12px; border: 1px solid #e8e8c8;
+            margin-top: 4px; background: rgba(0,0,0,0.5);
+        }
+        #flashlight-bar-fill { width: 100%; height: 100%; background: #60ff80; }
 
-    /* ─────────── SECRET VIDEO ─────────── */
-    #secret-vid { 
-      position: fixed; 
-      inset: 0; 
-      width: 100%; 
-      height: 100%; 
-      object-fit: contain; 
-      z-index: 200; 
-      background: #000; 
-      display: none; 
-    }
-  </style>
+        /* ── CAMERA SYSTEM ── */
+        #camera-ui {
+            position: fixed; inset: 0; z-index: 50;
+            display: flex; flex-direction: column; background: #000;
+            transform: translateY(100%); transition: transform 0.3s ease-out;
+        }
+        #camera-ui.open { transform: translateY(0); }
+        #cam-feed { flex: 1; position: relative; overflow: hidden; }
+        #cam-feed-img { width: 100%; height: 100%; object-fit: cover; }
+        #cam-label {
+            position: absolute; top: 14px; left: 20px; z-index: 5;
+            font-size: clamp(14px, 2vw, 26px); color: rgba(160,255,180,0.85);
+        }
+        
+        /* Music Box Wind-up Button */
+        #wind-music-box {
+            position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
+            z-index: 10; padding: 12px 24px; font-family: 'Oswald', sans-serif;
+            font-size: 18px; color: #fff; background: rgba(180,40,40,0.8);
+            border: 2px solid #ff6666; cursor: pointer; display: none;
+        }
+
+        /* Camera Map */
+        #cam-map {
+            position: absolute; bottom: 14px; right: 14px; z-index: 6;
+            background: rgba(0,0,0,0.85); border: 1px solid rgba(100,200,120,0.3);
+            padding: 8px;
+        }
+        .map-room { cursor: pointer; }
+        .map-room rect { fill: rgba(20,35,24,0.9); stroke: rgba(100,200,120,0.4); }
+        .map-room.active rect { fill: rgba(50,150,70,0.6); stroke: rgba(120,255,140,0.9); }
+        .map-id { font-size: 10px; fill: #a0ffa0; text-anchor: middle; }
+
+        /* ── HOVER TOGGLES ── */
+        #hover-cam-trigger {
+            position: fixed; bottom: 0; left: 35%; width: 30%; height: 6vh;
+            z-index: 55; background: rgba(255,255,255,0.1);
+            border-top: 2px solid rgba(255,255,255,0.4); text-align: center;
+            color: #fff; line-height: 6vh; letter-spacing: 2px;
+        }
+        #hover-mask-trigger {
+            position: fixed; bottom: 0; left: 0; width: 30%; height: 6vh;
+            z-index: 55; background: rgba(255,255,255,0.05);
+            border-top: 2px solid rgba(255,255,255,0.2); text-align: center;
+            color: #aaa; line-height: 6vh; letter-spacing: 2px;
+        }
+
+        /* ── JUMPSCARE & SCREENS ── */
+        #jumpscare-overlay {
+            position: fixed; inset: 0; z-index: 200; background: #000;
+            display: none; align-items: center; justify-content: center;
+        }
+        #jumpscare-overlay.active { display: flex; }
+        #jumpscare-img { width: 100%; height: 100%; object-fit: cover; }
+        #game-over-screen {
+            position: fixed; inset: 0; z-index: 250; background: #000;
+            display: none; flex-direction: column; align-items: center;
+            justify-content: center; color: #800; font-family: 'Creepster', cursive;
+            font-size: 60px;
+        }
+
+        /* Cursor */
+        #cursor {
+            position: fixed; width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.8); border-radius: 50%;
+            pointer-events: none; z-index: 300; transform: translate(-50%, -50%);
+        }
+    </style>
 </head>
 <body>
-  <canvas id="noise"></canvas>
-  <div id="scanlines"></div>
-  <div id="vignette"></div>
 
-  <div class="title-block">
-    <div class="title-line">FIVE NIGHTS</div>
-    <div class="title-line">AT STUARTS</div>
-    <div class="title-num">2</div>
-  </div>
+    <div id="room-wrapper">
+        <img id="room-img" src="room.png" alt="Office">
+        <div id="camera-btn"></div>
+    </div>
 
-  <ul id="menu">
-    <li id="menu-new" class="active selected">New Game</li>
-    <li id="menu-continue" class="inactive">Continue</li>
-  </ul>
+    <img id="peek-left" class="peek-zone" src="bonnie.png" alt="Left Vent Animatronic">
+    <img id="peek-right" class="peek-zone" src="chica.png" alt="Right Vent Animatronic">
+    <img id="peek-center" class="peek-zone" src="freddy.png" alt="Hallway Animatronic">
 
-  <div id="hint">PRESS & HOLD DELETE TO RESET DATA</div>
+    <div id="dark-overlay"></div>
+    <div id="vignette"></div>
+    <div id="scanlines"></div>
+    <div id="mask-overlay"></div>
 
-  <img src="image_d92a66.png" alt="Stuart silhouette" class="stuart-silhouette">
+    <div id="hud-container">
+        <div id="time-display">12 AM</div>
+        <div id="night-display">NIGHT 1</div>
+    </div>
+    <div id="flashlight-hud">
+        POWER
+        <div id="flashlight-bar-bg"><div id="flashlight-bar-fill"></div></div>
+    </div>
 
-  <div id="flash"></div>
+    <div id="hover-mask-trigger">MASK</div>
+    <div id="hover-cam-trigger">MONITOR</div>
 
-  <video id="secret-vid" src="crucifix.mp4" playsinline></video>
+    <div id="camera-ui">
+        <div id="cam-feed">
+            <img id="cam-feed-img" src="" alt="Camera Feed">
+            <div id="cam-label">CAM 11 - PRIZE CORNER</div>
+            <button id="wind-music-box">WIND MUSIC BOX</button>
+            
+            <div id="cam-map">
+                <svg viewBox="0 0 300 250" width="260" height="200">
+                    <g class="map-room" data-cam="09"><rect x="210" y="20" width="70" height="30"/><text x="245" y="38" class="map-id">CAM 09</text></g>
+                    <g class="map-room" data-cam="10"><rect x="210" y="75" width="70" height="30"/><text x="245" y="93" class="map-id">CAM 10</text></g>
+                    <g class="map-room active" data-cam="11"><rect x="210" y="130" width="70" height="30"/><text x="245" y="148" class="map-id">CAM 11</text></g>
+                    <g class="map-room" data-cam="12"><rect x="210" y="185" width="70" height="30"/><text x="245" y="203" class="map-id">CAM 12</text></g>
+                    <g class="map-room" data-cam="07"><rect x="115" y="25" width="70" height="40"/><text x="150" y="48" class="map-id">CAM 07</text></g>
+                    <g class="map-room" data-cam="08"><rect x="115" y="90" width="70" height="40"/><text x="150" y="113" class="map-id">CAM 08</text></g>
+                    <g class="map-room" data-cam="01"><rect x="20" y="20" width="70" height="30"/><text x="55" y="38" class="map-id">CAM 01</text></g>
+                    <g class="map-room" data-cam="02"><rect x="20" y="75" width="70" height="30"/><text x="55" y="93" class="map-id">CAM 02</text></g>
+                    <g class="map-room" data-cam="05"><rect x="90" y="210" width="50" height="25"/><text x="115" y="226" class="map-id">CAM 05</text></g>
+                    <g class="map-room" data-cam="06"><rect x="160" y="210" width="50" height="25"/><text x="185" y="226" class="map-id">CAM 06</text></g>
+                </svg>
+            </div>
+        </div>
+    </div>
 
-  <audio id="menu-music" src="menu_music.mp3" loop></audio>
+    <div id="jumpscare-overlay"><img id="jumpscare-img" src="" alt="Jumpscare"></div>
+    <div id="game-over-screen">GAME OVER</div>
 
-  <script>
-    /* ────── NOISE CANVAS ────── */
-    const noiseCanvas = document.getElementById('noise');
-    const nCtx = noiseCanvas.getContext('2d');
-    function sizeNoise() { noiseCanvas.width = innerWidth; noiseCanvas.height = innerHeight; }
-    sizeNoise(); 
-    addEventListener('resize', sizeNoise);
-    
-    function drawNoise() {
-      const { width: w, height: h } = noiseCanvas;
-      const id = nCtx.createImageData(w, h);
-      for (let i = 0; i < id.data.length; i += 4) {
-        const v = Math.random() * 255;
-        id.data[i] = id.data[i+1] = id.data[i+2] = v;
-        id.data[i+3] = 255;
-      }
-      nCtx.putImageData(id, 0, 0);
-    }
-    setInterval(drawNoise, 90);
+    <div id="cursor"></div>
 
-    /* ────── MENU LOGIC ────── */
-    const newBtn = document.getElementById('menu-new');
-    const contBtn = document.getElementById('menu-continue');
-    const flash = document.getElementById('flash');
-    const menuItems = [newBtn, contBtn];
-    let sel = 0;
+    <script>
+        // Core Engine State
+        const STATE = {
+            night: 1,
+            hour: 0,
+            timeTicks: 0,
+            flashPower: 100,
+            isFlashOn: false,
+            isCamOpen: false,
+            isMaskOn: false,
+            currentCam: '11',
+            musicBox: 100,
+            gameOver: false,
+            panX: -90
+        };
 
-    function updateMenu() {
-      menuItems.forEach((li, i) => li.classList.toggle('selected', i === sel));
-    }
+        // Standard FNAF 2 Accurate AI Roster
+        const AI = {
+            ToyBonnie:   { path: ['09', '03', '04', '02', '06', 'office_vent'], pos: '09', level: 3, targetVent: 'peek-right' },
+            ToyChica:    { path: ['09', '07', '04', '01', '05', 'office_vent'], pos: '09', level: 2, targetVent: 'peek-left' },
+            WitheredFoxy:{ path: ['08', 'hallway'], pos: '08', level: 4 },
+            Puppet:      { pos: '11', state: 'box' },
+            BalloonBoy:  { path: ['10', '05', 'office_room'], pos: '10', level: 2 }
+        };
 
-    addEventListener('keydown', e => {
-      if (secretActive) return; // ignore during secret video
-      if (['ArrowUp', 'w', 'W'].includes(e.key)) {
-        sel = (sel - 1 + menuItems.length) % menuItems.length;
-        updateMenu();
-      }
-      if (['ArrowDown', 's', 'S'].includes(e.key)) {
-        sel = (sel + 1) % menuItems.length;
-        updateMenu();
-      }
-      if (e.key === 'Enter' || e.key === ' ') {
-        activate(menuItems[sel]);
-      }
-      if (e.key === 'Delete') {
-        holdReset = true;
-      }
-    });
+        // Core DOM Handles
+        const DOM = {
+            roomWrapper: document.getElementById('room-wrapper'),
+            roomImg: document.getElementById('room-img'),
+            cursor: document.getElementById('cursor'),
+            camUi: document.getElementById('camera-ui'),
+            camImg: document.getElementById('cam-feed-img'),
+            camLabel: document.getElementById('cam-label'),
+            mask: document.getElementById('mask-overlay'),
+            flashFill: document.getElementById('flashlight-bar-fill'),
+            timeDisplay: document.getElementById('time-display'),
+            windBtn: document.getElementById('wind-music-box'),
+            peekLeft: document.getElementById('peek-left'),
+            peekRight: document.getElementById('peek-right'),
+            peekCenter: document.getElementById('peek-center'),
+            jumpscare: document.getElementById('jumpscare-overlay'),
+            jumpscareImg: document.getElementById('jumpscare-img'),
+            gameOver: document.getElementById('game-over-screen')
+        };
 
-    addEventListener('keyup', e => {
-      if (e.key === 'Delete') {
-        holdReset = false;
-        resetHold = 0;
-      }
-    });
-
-    menuItems.forEach(li => li.addEventListener('mouseover', () => {
-      sel = menuItems.indexOf(li);
-      updateMenu();
-    }));
-
-    menuItems.forEach(li => li.addEventListener('click', () => activate(li)));
-
-    function activate(li) {
-      if (li.id === 'menu-new') {
-        transition(() => location.href = 'game.html');
-      } else if (li.id === 'menu-continue' && li.classList.contains('active')) {
-        const n = contBtn.dataset.night || 1;
-        transition(() => location.href = `game.html?night=${n}`);
-      }
-    }
-
-    function transition(cb) {
-      flash.style.opacity = '1';
-      setTimeout(cb, 140);
-    }
-
-    /* continue save */
-    const saved = parseInt(localStorage.getItem('fnafSaveNight') || '0');
-    if (saved > 1) {
-      contBtn.classList.remove('inactive');
-      contBtn.classList.add('active');
-      contBtn.dataset.night = saved;
-    }
-
-    /* reset data by holding Delete */
-    let holdReset = false, resetHold = 0;
-    setInterval(() => {
-      if (holdReset) {
-        resetHold += 100;
-        if (resetHold > 2000) {
-          localStorage.removeItem('fnafSaveNight');
-          location.reload();
-        }
-      } else {
-        resetHold = 0;
-      }
-    }, 100);
-
-    /* ────── AMBIENT MUSIC ────── */
-    const music = document.getElementById('menu-music');
-    music.volume = 0.45;
-    music.play().catch(() => {
-      const starter = () => {
-        music.play().catch(() => {});
-        removeEventListener('click', starter);
-        removeEventListener('keydown', starter);
-      };
-      addEventListener('click', starter);
-      addEventListener('keydown', starter);
-    });
-
-    /* ────── SECRET WORD TRIGGER ────── */
-    const secretVid = document.getElementById('secret-vid');
-    let keyBuffer = '';
-    let secretActive = false;
-
-    addEventListener('keydown', e => {
-      if (secretActive) return; // ignore while video playing
-      if (e.key.length === 1) {
-        keyBuffer += e.key.toLowerCase();
-        if (keyBuffer.length > 6) keyBuffer = keyBuffer.slice(-6);
-        if (keyBuffer === 'stuart') triggerSecret();
-      }
-    });
-
-    function triggerSecret() {
-      secretActive = true;
-      music.pause();
-      Array.from(document.body.children).forEach(el => {
-        if (el.id !== 'secret-vid') el.style.display = 'none';
-      });
-      secretVid.style.display = 'block';
-      secretVid.currentTime = 0;
-      secretVid.play().catch(() => {});
-      secretVid.onended = () => {
-        Array.from(document.body.children).forEach(el => {
-          if (el.id !== 'secret-vid') el.style.display = '';
+        // Performance Throttled Panorama Pan Mechanism
+        window.addEventListener('mousemove', (e) => {
+            DOM.cursor.style.left = `${e.clientX}px`;
+            DOM.cursor.style.top = `${e.clientY}px`;
+            
+            if(!STATE.isCamOpen && !STATE.gameOver) {
+                const percent = e.clientX / window.innerWidth;
+                STATE.panX = -30 - (percent * 120);
+                DOM.roomWrapper.style.transform = `translateX(${STATE.panX}vw) scale(0.6)`;
+            }
         });
-        secretVid.style.display = 'none';
-        secretActive = false;
-        music.play().catch(() => {});
-        keyBuffer = '';
-      };
-    }
-  </script>
+
+        // Flashlight Toggle Logic
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'ControlLeft' || e.code === 'ControlRight' || e.code === 'KeyF') {
+                if (STATE.flashPower > 0 && !STATE.isMaskOn) {
+                    STATE.isFlashOn = true;
+                    updateLighting();
+                }
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'ControlLeft' || e.code === 'ControlRight' || e.code === 'KeyF') {
+                STATE.isFlashOn = false;
+                updateLighting();
+            }
+        });
+
+        function updateLighting() {
+            if (STATE.isFlashOn && STATE.flashPower > 0) {
+                DOM.roomImg.classList.add('lit');
+                STATE.flashPower = Math.max(0, STATE.flashPower - 0.05);
+                DOM.flashFill.style.width = `${STATE.flashPower}%`;
+            } else {
+                DOM.roomImg.classList.remove('lit');
+            }
+            renderOfficePeeks();
+        }
+
+        // Mask & Camera Triggers
+        document.getElementById('hover-cam-trigger').addEventListener('mouseenter', () => {
+            if (STATE.isMaskOn || STATE.gameOver) return;
+            STATE.isCamOpen = !STATE.isCamOpen;
+            DOM.camUi.classList.toggle('open', STATE.isCamOpen);
+            updateCameraFeed();
+        });
+
+        document.getElementById('hover-mask-trigger').addEventListener('mouseenter', () => {
+            if (STATE.isCamOpen || STATE.gameOver) return;
+            STATE.isMaskOn = !STATE.isMaskOn;
+            DOM.mask.classList.toggle('on', STATE.isMaskOn);
+            renderOfficePeeks();
+        });
+
+        // Camera Navigation
+        document.querySelectorAll('.map-room').forEach(el => {
+            el.addEventListener('click', () => {
+                document.querySelectorAll('.map-room').forEach(r => r.classList.remove('active'));
+                el.classList.add('active');
+                STATE.currentCam = el.dataset.cam;
+                DOM.camLabel.textContent = `CAM ${STATE.currentCam}`;
+                DOM.windBtn.style.display = (STATE.currentCam === '11') ? 'block' : 'none';
+                updateCameraFeed();
+            });
+        });
+
+        // Music Box Mechanics
+        DOM.windBtn.addEventListener('mousedown', () => {
+            if (STATE.isCamOpen && STATE.currentCam === '11') {
+                STATE.musicBox = Math.min(100, STATE.musicBox + 3);
+            }
+        });
+
+        function updateCameraFeed() {
+            if (!STATE.isCamOpen) return;
+            // Sets feed display path based on state
+            DOM.camImg.src = `cam_${STATE.currentCam}.png`;
+        }
+
+        // Render Animatronics at Office Vents & Center Hallway
+        function renderOfficePeeks() {
+            const lit = STATE.isFlashOn;
+            DOM.peekRight.style.display = (lit && AI.ToyBonnie.pos === 'office_vent') ? 'block' : 'none';
+            DOM.peekLeft.style.display  = (lit && AI.ToyChica.pos === 'office_vent') ? 'block' : 'none';
+            DOM.peekCenter.style.display = (lit && AI.WitheredFoxy.pos === 'hallway') ? 'block' : 'none';
+        }
+
+        // Accurate FNAF 2 Opportunity Timer Execution Loop (Every 5 seconds)
+        setInterval(() => {
+            if (STATE.gameOver) return;
+
+            // Process Animatronic Movements
+            Object.keys(AI).forEach(key => {
+                const char = AI[key];
+                if (!char.path) return;
+
+                const roll = Math.floor(Math.random() * 20) + 1;
+                if (roll <= char.level) {
+                    let currentIndex = char.path.indexOf(char.pos);
+                    if (currentIndex < char.path.length - 1) {
+                        char.pos = char.path[currentIndex + 1];
+                    }
+                }
+            });
+
+            // Check Aggro and Office Intrusion Logic
+            checkOfficeIntrusions();
+        }, 4970);
+
+        // Sub-second Engine Loop for Time and Mechanics
+        setInterval(() => {
+            if (STATE.gameOver) return;
+
+            // Time progression
+            STATE.timeTicks++;
+            if (STATE.timeTicks % 60 === 0) {
+                STATE.hour = (STATE.hour + 1) % 12;
+                DOM.timeDisplay.textContent = `${STATE.hour === 0 ? 12 : STATE.hour} AM`;
+            }
+
+            // Drain Music Box
+            STATE.musicBox = Math.max(0, STATE.musicBox - 0.15);
+            if (STATE.musicBox <= 0) {
+                triggerJumpscare('puppet.png');
+            }
+
+            // Deplete Flashlight when active
+            if (STATE.isFlashOn) updateLighting();
+
+        }, 1000);
+
+        function checkOfficeIntrusions() {
+            // Withered Foxy Check (Requires Flashlight, Mask does not block)
+            if (AI.WitheredFoxy.pos === 'hallway' && !STATE.isFlashOn && Math.random() < 0.3) {
+                triggerJumpscare('foxy.png');
+            }
+
+            // Vent Animatronics Check (Blocked by Mask)
+            ['ToyBonnie', 'ToyChica'].forEach(name => {
+                const anim = AI[name];
+                if (anim.pos === 'office_vent') {
+                    setTimeout(() => {
+                        if (!STATE.isMaskOn) {
+                            triggerJumpscare(`${name.toLowerCase()}.png`);
+                        } else {
+                            // Successfully warded off
+                            anim.pos = anim.path[0];
+                            renderOfficePeeks();
+                        }
+                    }, 2500);
+                }
+            });
+        }
+
+        function triggerJumpscare(imgSrc) {
+            STATE.gameOver = true;
+            DOM.jumpscareImg.src = imgSrc;
+            DOM.jumpscare.classList.add('active');
+            
+            setTimeout(() => {
+                DOM.jumpscare.classList.remove('active');
+                DOM.gameOver.style.display = 'flex';
+            }, 2000);
+        }
+    </script>
 </body>
 </html>
