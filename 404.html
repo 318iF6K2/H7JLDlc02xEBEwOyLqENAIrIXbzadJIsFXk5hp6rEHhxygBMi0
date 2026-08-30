@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 - Page Not Found | Crazyben</title>
+  <link rel="icon" type="image/png" href="CSNew4.png" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(180deg, rgba(11, 19, 43, 0.75) 0%, rgba(11, 19, 43, 0.95) 100%),
+                  url('BlueSkies.png') center/cover no-repeat fixed;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background-color: rgba(11, 19, 43, 0.92);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 12px 6%;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 25px;
+    }
+
+    nav a {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #ffffff;
+      transition: color 0.2s;
+    }
+
+    nav a:hover {
+      color: #00b4d8;
+    }
+
+    .error-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 20px 60px 20px;
+    }
+
+    .error-code {
+      font-size: 7rem;
+      font-weight: 900;
+      color: #caf0f8;
+      letter-spacing: 2px;
+      line-height: 1;
+      text-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+      margin-bottom: 10px;
+    }
+
+    .error-title {
+      font-size: 1.8rem;
+      color: #90e0ef;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .error-message {
+      font-size: 1.05rem;
+      color: #e0f2fe;
+      max-width: 480px;
+      line-height: 1.6;
+      margin-bottom: 30px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+      color: #ffffff;
+      padding: 14px 32px;
+      border-radius: 20px;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 180, 216, 0.5);
+    }
+
+    footer {
+      background-color: #070a13;
+      text-align: center;
+      padding: 30px 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .copyright {
+      font-size: 0.8rem;
+      color: #5c6b73;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <nav>
+      <ul>
+        <li><a href="https://www.roblox.com/users/946447734/profile" target="_blank">Roblox Profile</a></li>
+        <li><a href="https://discord.gg/XgdCf2AfPU" target="_blank">Discord</a></li>
+        <li><a href="https://www.roblox.com/communities/5077085" target="_blank">Skygaze Studio</a></li>
+        <li><a href="commissions.html">Commissions</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="error-container">
+    <div class="error-code">404</div>
+    <div class="error-title">Page Not Found</div>
+    <p class="error-message">
+      The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
+    </p>
+    <a href="index.html" class="btn">Return to Home</a>
+  </main>
+
+  <footer>
+    <div class="copyright">crazyben.dev</div>
+  </footer>
+
+</body>
+</html>
