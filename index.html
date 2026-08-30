@@ -86,24 +86,34 @@
       min-width: 300px;
     }
 
+    .hero-greeting {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #caf0f8;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+
     .hero-brand {
       display: flex;
       align-items: center;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
 
     .hero-title-img {
-      max-width: 340px;
+      max-width: 380px;
       width: 100%;
       height: auto;
-      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
     }
 
-    .hero-text p {
+    .hero-text p.bio {
       color: #e0f2fe;
-      font-size: 1.15rem;
-      line-height: 1.6;
-      max-width: 500px;
+      font-size: 1.2rem;
+      line-height: 1.65;
+      max-width: 520px;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     }
 
@@ -340,10 +350,11 @@
 
   <section class="hero">
     <div class="hero-text">
+      <div class="hero-greeting">Hey, I'm</div>
       <div class="hero-brand">
         <img src="CrazybenLogo.png" alt="Crazyben Logo" class="hero-title-img">
       </div>
-      <p>Hey, I'm <strong>Crazyben</strong>! Lead developer at <strong>Skygaze Studio</strong>. I build engaging Roblox experiences centered around smooth platforming and fun core gameplay mechanics.</p>
+      <p class="bio">Lead developer at <strong>Skygaze Studio</strong>. I build engaging Roblox experiences centered around smooth platforming and fun core gameplay mechanics.</p>
     </div>
     <div class="hero-media">
       <img src="https://via.placeholder.com/540x300/1c2541/caf0f8?text=Skygaze+Studio+Featured+Game" alt="Main Game Screenshot">
