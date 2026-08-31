@@ -939,7 +939,7 @@
     // ── Access guard ─────────────────────────────────────────────
     localStorage.setItem('fnafUnlocked', 'true');
     if (localStorage.getItem('fnafUnlocked') !== 'true') {
-        window.location.replace('/');
+        window.location.replace('/gideonsdiapersisgoodygoodygood');
     }
 
     // ── Pan ──────────────────────────────────────────────────────
@@ -1145,7 +1145,7 @@
 
     document.getElementById('btn-resume').addEventListener('click', () => togglePause());
     document.getElementById('btn-main-menu').addEventListener('click', () => {
-        window.location.href = '/';
+        window.location.href = '/gideonsdiapersisgoodygoodygood';
     });
 
     // ── Noise canvas ─────────────────────────────────────────────
@@ -1254,7 +1254,7 @@
             endingDiv.classList.add('show');
             endingVid.play().catch(() => {});
             endingVid.addEventListener('ended', () => {
-                window.location.href = '/';
+                window.location.href = '/gideonsdiapersisgoodygoodygood';
             });
             return;
         }
@@ -1273,7 +1273,7 @@
         document.getElementById('btn-save-continue').addEventListener('click', () => {
             const nextNight = urlNight + 1;
             localStorage.setItem('fnafSaveNight', nextNight);
-            window.location.href = '/';
+            window.location.href = '/gideonsdiapersisgoodygoodygood';
         });
     }
 
@@ -1450,7 +1450,7 @@
             let i = 0;
             function showNext() {
                 if (i >= messages.length) {
-                    window.location.href = '/';
+                    window.location.href = '/gideonsdiapersisgoodygoodygood';
                     return;
                 }
                 deathText.textContent = messages[i++];
