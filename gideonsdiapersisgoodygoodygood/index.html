@@ -1,1040 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Five Night's At Stuarts</title>
-    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Five Night's At Stuarts 2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Creepster&display=swap" rel="stylesheet">
+  <style>
+    /* ─────────── RESET ─────────── */
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html,body{width:100%;height:100%;background:#000;font-family:'Oswald',sans-serif;overflow:hidden}
+    body{cursor:default}
 
-        body {
-            background: #000;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            font-family: 'Oswald', sans-serif;
-            user-select: none;
-            cursor: none;
-        }
+    /* ─────────── STATIC OVERLAYS ─────────── */
+    #noise,#scanlines,#vignette{position:fixed;inset:0;pointer-events:none;z-index:9}
+    #noise{opacity:.035}
+    #scanlines{background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.17) 2px 4px);z-index:10}
+    #vignette{background:radial-gradient(circle at center,transparent 55%,rgba(0,0,0,.82) 100%);z-index:11}
 
-        /* ── MAIN MENU ── */
-        #main-menu {
-            position: fixed;
-            inset: 0;
-            z-index: 300;
-            background: #000;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 60px 80px;
-            cursor: none;
-            overflow: hidden;
-        }
+    /* ─────────── TITLE BLOCK (LEFT) ─────────── */
+    .title-block{position:absolute;top:12%;left:6%;display:flex;flex-direction:column;gap:.2em;z-index:20;animation:titleFlicker 7s steps(1,end) infinite}
+    @keyframes titleFlicker{0%,97%,100%{opacity:1}98%{opacity:.78}99%{opacity:1}}
+    .title-line{font-family:'Creepster',cursive;font-size:clamp(42px,7vw,96px);color:#6bb3ff;letter-spacing:.04em;text-shadow:0 0 34px rgba(80,150,255,.85),3px 3px 0 #042354}
+    .title-num{font-family:'Creepster',cursive;font-size:clamp(110px,17vw,220px);line-height:.8;color:#2f7bff;transform:translateX(-8%);text-shadow:0 0 50px rgba(70,140,255,.55)}
 
-        #menu-bg-img {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-            opacity: 0.45;
-            filter: contrast(1.2) brightness(0.8);
-            z-index: 1;
-            pointer-events: none;
-        }
+    /* ─────────── MENU OPTIONS (BOTTOM-LEFT) ─────────── */
+    #menu{position:absolute;bottom:10%;left:6%;list-style:none;display:flex;flex-direction:column;gap:10px;z-index:20}
+    #menu li{font-size:clamp(18px,2.6vw,32px);letter-spacing:.45em;text-transform:uppercase;color:#143256;transition:all .16s ease;user-select:none}
+    #menu li.active{color:#8bc4ff}
+    #menu li.active:hover,#menu li.selected{color:#cfe4ff;text-shadow:0 0 12px rgba(140,190,255,.9);cursor:pointer}
+    #menu li.inactive{color:#0f2138;cursor:not-allowed}
+    #menu li.selected::before{content:'▶';position:absolute;left:-1.6em;color:#cfe4ff;animation:blinkArrow .7s steps(1,end) infinite}
+    @keyframes blinkArrow{0%,100%{opacity:1}50%{opacity:0}}
 
-        #menu-static {
-            position: absolute;
-            inset: 0;
-            z-index: 2;
-            pointer-events: none;
-            opacity: 0.08;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(255,255,255,0.15) 0px,
-                rgba(0,0,0,0.4) 2px
-            );
-            animation: menu-static-flicker 0.1s infinite;
-        }
-        @keyframes menu-static-flicker {
-            0% { opacity: 0.06; }
-            50% { opacity: 0.1; }
-            100% { opacity: 0.07; }
-        }
+    /* ─────────── HINT / COPYRIGHT (BOTTOM-RIGHT) ─────────── */
+    #hint{position:absolute;bottom:4%;right:6%;font-size:clamp(10px,1.1vw,14px);letter-spacing:.25em;color:#13325c;z-index:20;text-align:right}
 
-        .menu-content {
-            position: relative;
-            z-index: 3;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+    /* ─────────── STUART SILHOUETTE (RIGHT) ─────────── */
+    .stuart-silhouette{position:absolute;bottom:-5%;right:-2%;width:50vw;max-width:680px;opacity:.55;filter:brightness(.55) sepia(.6) hue-rotate(-170deg) saturate(1.8) drop-shadow(0 0 45px rgba(80,130,255,.45));pointer-events:none;z-index:12}
 
-        .menu-title {
-            font-family: 'Creepster', cursive;
-            font-size: clamp(40px, 6vw, 85px);
-            color: #e0e0e0;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.4), 3px 3px 0px #000;
-            line-height: 1;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            animation: title-glitch 4s infinite;
-        }
+    /* ─────────── FLASH TRANSITION ─────────── */
+    #flash{position:fixed;inset:0;background:#fff;pointer-events:none;opacity:0;z-index:100;transition:opacity .05s}
 
-        @keyframes title-glitch {
-            0%, 95%, 100% { transform: translate(0,0); opacity: 1; }
-            96% { transform: translate(-4px, 2px); opacity: 0.8; filter: hue-rotate(90deg); }
-            97% { transform: translate(3px, -1px); opacity: 0.9; }
-            98% { transform: translate(-2px, -3px); opacity: 0.4; }
-        }
-
-        .menu-options {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 15px;
-        }
-
-        .menu-btn {
-            font-family: 'Oswald', sans-serif;
-            font-size: clamp(20px, 2.5vw, 36px);
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: #888;
-            background: transparent;
-            border: none;
-            cursor: none;
-            transition: color 0.2s, text-shadow 0.2s, transform 0.1s;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .menu-btn::before {
-            content: '>>';
-            opacity: 0;
-            transform: translateX(-10px);
-            transition: all 0.2s;
-            color: #fff;
-            font-size: 0.8em;
-        }
-
-        .menu-btn:hover {
-            color: #fff;
-            text-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
-            transform: translateX(10px);
-        }
-
-        .menu-btn:hover::before {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .menu-copyright {
-            position: relative;
-            z-index: 3;
-            font-size: clamp(12px, 1.2vw, 18px);
-            color: #555;
-            letter-spacing: 2px;
-        }
-
-        /* ── ROOM WRAPPER (moves together with hotspots) ── */
-        #room-wrapper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 280vw;
-            height: 100vh;
-            transform: translateX(-90vw) scale(0.6);
-            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            will-change: transform;
-        }
-
-        #room-img {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-            filter: brightness(0.5);
-        }
-
-        /* ── CAMERA HOTSPOT (box near door) ── */
-        #camera-btn {
-            position: absolute;
-            left: 50%;
-            top: 28%;
-            width: 9%;
-            height: 30%;
-            cursor: none;
-            z-index: 8;
-            border: none;
-            background: transparent;
-        }
-
-        /* ── OVERLAYS ── */
-        #vignette {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at center,
-                transparent 38%, rgba(0,0,0,0.72) 100%);
-            pointer-events: none;
-            z-index: 5;
-        }
-        #scanlines {
-            position: absolute;
-            inset: 0;
-            background: repeating-linear-gradient(
-                to bottom, transparent, transparent 2px,
-                rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
-            );
-            pointer-events: none;
-            z-index: 6;
-        }
-        #noise {
-            position: fixed;
-            inset: 0;
-            z-index: 4;
-            pointer-events: none;
-            opacity: 0.035;
-        }
-        #dark-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.26);
-            pointer-events: none;
-            z-index: 3;
-        }
-
-        /* ── SIDE DOORS ── */
-        .door-wrap {
-            position: fixed;
-            top: 20vh;
-            height: 60vh;
-            width: 16%;
-            z-index: 2;
-            cursor: none;
-            pointer-events: none;
-            filter: brightness(0.5);
-            transition: left  0.5s cubic-bezier(0.25,0.46,0.45,0.94),
-                        right 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
-        }
-        #door-left  { left: -18%; }
-        #door-right { right: -16%; }
-        #door-left.visible  { left: 18%;  pointer-events: auto; }
-        #door-right.visible { right: 13%; pointer-events: auto; }
-
-        .door-img {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: fill;
-        }
-        #door-left  .img-open   { transform: scaleX(-1); }
-        #door-right .img-closed { transform: scaleX(-1); }
-
-        .door-wrap .img-open   { display: none; }
-        .door-wrap .img-closed { display: block; }
-        .door-wrap.open .img-open   { display: block; }
-        .door-wrap.open .img-closed { display: none; }
-
-        /* ── POWER HUD ── */
-        #power-hud {
-            position: fixed;
-            bottom: 22vh;
-            left: 2.5vw;
-            z-index: 60;
-            pointer-events: none;
-            font-family: 'Oswald', sans-serif;
-            color: #e8e8c8;
-            text-shadow: 0 0 6px rgba(0,0,0,0.9);
-            line-height: 1.5;
-        }
-        #power-hud .hud-label {
-            font-size: clamp(12px, 1.4vw, 20px);
-            font-weight: 400;
-            letter-spacing: 0.04em;
-        }
-        #power-hud .hud-value {
-            font-size: clamp(14px, 1.7vw, 24px);
-            font-weight: 700;
-        }
-        #power-bars {
-            display: flex;
-            gap: 3px;
-            margin-top: 3px;
-        }
-        .power-bar {
-            width: clamp(10px, 1.2vw, 18px);
-            height: clamp(14px, 1.8vw, 26px);
-            border: 1px solid rgba(160,255,176,0.5);
-            background: transparent;
-            transition: background 0.2s, border-color 0.2s;
-        }
-        #power-hud.usage-3 .power-bar { border-color: rgba(255,238,68,0.5); }
-        #power-hud.usage-4 .power-bar { border-color: rgba(255,153,34,0.5); }
-        #power-hud.usage-5 .power-bar { border-color: rgba(255,51,51,0.5); }
-        #power-hud.usage-1 { color: #a0ffb0; }
-        #power-hud.usage-2 { color: #a0ffb0; }
-        #power-hud.usage-3 { color: #ffee44; }
-        #power-hud.usage-4 { color: #ff9922; }
-        #power-hud.usage-5 { color: #ff3333; }
-
-        .power-bar.on { background: #a0ffb0; box-shadow: 0 0 6px #60ff80; }
-        #power-hud.usage-3 .power-bar.on { background: #ffee44; box-shadow: 0 0 6px #ffe000; }
-        #power-hud.usage-4 .power-bar.on { background: #ff9922; box-shadow: 0 0 6px #ff7700; }
-        #power-hud.usage-5 .power-bar.on { background: #ff3333; box-shadow: 0 0 6px #ff0000; }
-
-        /* ── CAMERA UI ── */
-        #camera-ui {
-            position: fixed;
-            inset: 0;
-            z-index: 50;
-            display: flex;
-            flex-direction: column;
-            background: #000;
-            transform: translateY(100%);
-            transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
-            cursor: none;
-        }
-        #camera-ui.open { transform: translateY(0); }
-
-        #cam-feed {
-            flex: 1;
-            position: relative;
-            background: #000;
-            overflow: hidden;
-        }
-        #cam-feed-screen {
-            position: absolute;
-            inset: 0;
-            background: #000;
-        }
-        #cam-feed::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: rgba(40,255,80,0.03);
-            pointer-events: none;
-            z-index: 2;
-        }
-        #cam-feed::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: repeating-linear-gradient(
-                to bottom, transparent, transparent 2px,
-                rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 4px
-            );
-            pointer-events: none;
-            z-index: 3;
-        }
-        #cam-label {
-            position: absolute;
-            top: 14px;
-            left: 20px;
-            font-family: 'Oswald', sans-serif;
-            font-size: clamp(14px, 2vw, 26px);
-            color: rgba(160,255,180,0.85);
-            text-shadow: 0 0 8px rgba(0,255,60,0.5);
-            letter-spacing: 0.1em;
-            z-index: 5;
-            pointer-events: none;
-        }
-        #cam-rec {
-            position: absolute;
-            top: 16px;
-            right: 20px;
-            font-family: 'Oswald', sans-serif;
-            font-size: clamp(11px, 1.3vw, 18px);
-            color: #ff4444;
-            letter-spacing: 0.12em;
-            z-index: 5;
-            pointer-events: none;
-            animation: blink-rec 1.4s step-start infinite;
-        }
-        @keyframes blink-rec { 0%,49%{opacity:1} 50%,100%{opacity:0} }
-
-        #cam-controls {
-            background: rgba(10,10,10,0.95);
-            border-top: 1px solid rgba(100,200,120,0.25);
-            padding: 10px 16px 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        #cam-selector { display: none; }
-        .cam-btn {
-            font-family: 'Oswald', sans-serif;
-            font-size: clamp(9px, 1vw, 14px);
-            color: rgba(180,220,190,0.8);
-            background: rgba(20,30,22,0.9);
-            border: 1px solid rgba(100,200,120,0.35);
-            padding: 4px 10px;
-            letter-spacing: 0.08em;
-            cursor: none;
-            transition: background 0.15s, color 0.15s, border-color 0.15s;
-        }
-        .cam-btn:hover, .cam-btn.active {
-            background: rgba(60,160,80,0.35);
-            color: #c0ffcc;
-            border-color: rgba(100,220,130,0.7);
-        }
-        #cam-lower-row {
-            display: flex;
-            justify-content: flex-end;
-        }
-        #btn-lower-cam {
-            font-family: 'Oswald', sans-serif;
-            font-size: clamp(11px, 1.2vw, 16px);
-            color: rgba(180,220,190,0.8);
-            background: transparent;
-            border: 1px solid rgba(100,200,120,0.4);
-            padding: 5px 18px;
-            letter-spacing: 0.1em;
-            cursor: none;
-            transition: background 0.15s, color 0.15s;
-        }
-        #btn-lower-cam:hover {
-            background: rgba(60,160,80,0.25);
-            color: #c0ffcc;
-        }
-        .cam-disabled {
-            opacity: 0.4;
-            pointer-events: none;
-            text-decoration: line-through;
-            color: rgba(255,80,80,0.6) !important;
-            border-color: rgba(255,80,80,0.25) !important;
-        }
-        #cam-feed-img {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-            z-index: 1;
-        }
-        #cam-disabled-text {
-            position: absolute;
-            inset: 0;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Oswald', sans-serif;
-            font-size: clamp(18px, 3vw, 40px);
-            color: rgba(255,60,60,0.7);
-            letter-spacing: 0.15em;
-            z-index: 4;
-            pointer-events: none;
-        }
-
-        /* ── CAMERA MAP ── */
-        #cam-map {
-            position: absolute;
-            bottom: 14px;
-            right: 14px;
-            z-index: 6;
-            background: rgba(0,0,0,0.78);
-            border: 1px solid rgba(100,200,120,0.22);
-            padding: 8px;
-            pointer-events: all;
-            cursor: none;
-        }
-        #cam-map .map-room { cursor: none; }
-        #cam-map .map-room:not(.map-disabled) rect {
-            transition: fill 0.12s, stroke 0.12s;
-        }
-        #cam-map .map-room:not(.map-disabled):hover rect {
-            fill: rgba(40,120,60,0.45);
-            stroke: rgba(100,230,130,0.7);
-        }
-        #cam-map .map-line {
-            stroke: rgba(100,200,120,0.22);
-            stroke-width: 1.5;
-        }
-        #cam-map .map-room rect {
-            fill: rgba(20,35,24,0.9);
-            stroke: rgba(100,200,120,0.38);
-            stroke-width: 1;
-            transition: fill 0.2s, stroke 0.2s;
-        }
-        #cam-map .map-room.active rect {
-            fill: rgba(50,150,70,0.52);
-            stroke: rgba(120,255,140,0.85);
-            stroke-width: 1.5;
-        }
-        #cam-map .map-disabled rect {
-            fill: rgba(35,12,12,0.9);
-            stroke: rgba(180,50,50,0.32);
-        }
-        #cam-map .map-id {
-            font-family: 'Oswald', sans-serif;
-            font-size: 9px;
-            font-weight: 600;
-            text-anchor: middle;
-            dominant-baseline: middle;
-            fill: rgba(155,215,170,0.75);
-            letter-spacing: 0.07em;
-        }
-        #cam-map .map-room.active .map-id { fill: #b8ffd0; }
-        #cam-map .map-disabled .map-id    { fill: rgba(200,70,70,0.65); }
-        #cam-map .map-name {
-            font-family: 'Oswald', sans-serif;
-            font-size: 6.5px;
-            text-anchor: middle;
-            dominant-baseline: middle;
-            fill: rgba(110,170,125,0.65);
-            letter-spacing: 0.04em;
-        }
-        #cam-map .map-room.active .map-name { fill: rgba(180,255,200,0.9); }
-        #cam-map .map-disabled .map-name    { fill: rgba(160,50,50,0.55); }
-        #cam-map .map-office-rect {
-            fill: rgba(40,35,18,0.9);
-            stroke: rgba(180,160,60,0.38);
-            stroke-width: 1;
-        }
-        #cam-map .map-office-label {
-            font-family: 'Oswald', sans-serif;
-            font-size: 8px;
-            text-anchor: middle;
-            dominant-baseline: middle;
-            fill: rgba(200,178,70,0.65);
-            letter-spacing: 0.12em;
-        }
-
-        /* ── LIGHT BUTTON ── */
-        #btn-light {
-            position: fixed;
-            bottom: 6vh;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 30;
-            display: none;
-            font-family: 'Oswald', sans-serif;
-            font-size: clamp(13px, 1.6vw, 22px);
-            letter-spacing: 0.14em;
-            color: rgba(255,240,160,0.9);
-            background: rgba(15,12,5,0.85);
-            border: 1px solid rgba(255,230,100,0.45);
-            padding: 7px 26px;
-            cursor: none;
-            transition: background 0.1s, opacity 0.2s;
-        }
-        #btn-light.visible { display: block; }
-        #btn-light.cooldown { opacity: 0.35; pointer-events: none; }
-        #btn-light:hover { background: rgba(50,45,10,0.9); }
-
-        /* ── LIGHT FLASH ── */
-        #light-flash {
-            position: fixed;
-            inset: 0;
-            z-index: 28;
-            background: rgba(255,245,200,0.14);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.04s;
-        }
-        #light-flash.on { opacity: 1; }
-
-        /* ── DOOR PEEK ── */
-        #door-peek {
-            position: fixed;
-            top: 12vh;
-            height: 76vh;
-            width: 22vw;
-            z-index: 29;
-            display: none;
-            overflow: hidden;
-        }
-        #door-peek.left  { left: 14vw; }
-        #door-peek.right { right: 14vw; }
-        #door-peek img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center top;
-        }
-
-        /* ── NIGHT 5 ENDING VIDEO ── */
-        #night5-ending {
-            position: fixed;
-            inset: 0;
-            z-index: 160;
-            background: #000;
-            display: none;
-        }
-        #night5-ending.show { display: block; }
-        #night5-ending video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        /* ── MORNING / 6 AM SCREEN ── */
-        #morning-screen {
-            position: fixed;
-            inset: 0;
-            z-index: 150;
-            background: #000;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 44px;
-            opacity: 0;
-            transition: opacity 2.5s ease;
-        }
-        #morning-screen.show  { display: flex; }
-        #morning-screen.fade  { opacity: 1; }
-        #morning-night-label {
-            font-family: 'Oswald', sans-serif;
-            font-size: clamp(20px, 3.5vw, 50px);
-            color: rgba(255,255,255,0.55);
-            letter-spacing: 0.3em;
-        }
-        #btn-save-continue {
-            font-family: 'Oswald', sans-serif;
-            font-size: clamp(14px, 1.8vw, 26px);
-            letter-spacing: 0.22em;
-            color: #fff;
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.4);
-            padding: 14px 46px;
-            cursor: none;
-            transition: background 0.15s, border-color 0.15s;
-        }
-        #btn-save-continue:hover {
-            background: rgba(255,255,255,0.08);
-            border-color: rgba(255,255,255,0.9);
-        }
-
-        /* ── JUMPSCARE ── */
-        #jumpscare-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 200;
-            background: #000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        #jumpscare-overlay.active { display: flex; }
-        #jumpscare-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            animation: js-shake 0.08s steps(2) infinite;
-        }
-        @keyframes js-shake {
-            0%   { transform: translate(-10px, -6px)  rotate(-3deg) scale(1.08); }
-            25%  { transform: translate(10px,  7px)   rotate(3deg)  scale(1.04); }
-            50%  { transform: translate(-7px,  10px)  rotate(-2deg) scale(1.1);  }
-            75%  { transform: translate(7px,  -9px)   rotate(2deg)  scale(1.05); }
-            100% { transform: translate(-10px, -6px)  rotate(-3deg) scale(1.08); }
-        }
-
-        /* ── DEATH SCREEN ── */
-        #death-screen {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 28px;
-        }
-        #death-screen.visible { display: flex; }
-        #gideon-img {
-            width: clamp(100px, 14vw, 200px);
-            height: clamp(100px, 14vw, 200px);
-            object-fit: contain;
-        }
-        #death-text {
-            font-family: 'Oswald', sans-serif;
-            font-size: clamp(16px, 2.4vw, 34px);
-            color: #fff;
-            letter-spacing: 0.14em;
-            text-align: center;
-            max-width: 80vw;
-            opacity: 0;
-            transition: opacity 0.45s;
-        }
-        #death-text.visible { opacity: 1; }
-
-        /* ── OVERLAYS ── */
-        #bonnie-overlay, #chica-overlay, #foxy-overlay, #freddy-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            max-height: 90%;
-            max-width: 75%;
-            object-fit: contain;
-            z-index: 2;
-            display: none;
-            pointer-events: none;
-        }
-        #bonnie-overlay { filter: sepia(0.4) hue-rotate(85deg) brightness(0.65) contrast(1.1); }
-        #chica-overlay { filter: sepia(0.7) hue-rotate(0deg) saturate(2.2) brightness(0.6) contrast(1.2); }
-        #foxy-overlay { filter: brightness(0.7) saturate(1.4) contrast(1.15); }
-        #freddy-overlay { filter: brightness(0.65) sepia(0.3) contrast(1.1); }
-
-        /* ── CAMERA STATIC FLASH ── */
-        #cam-static {
-            position: absolute;
-            inset: 0;
-            z-index: 7;
-            pointer-events: none;
-            opacity: 0;
-            background:
-                repeating-linear-gradient(
-                    0deg,
-                    rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px,
-                    transparent 1px, transparent 4px
-                ),
-                repeating-linear-gradient(
-                    90deg,
-                    rgba(120,255,160,0.06) 0px, rgba(0,0,0,0.12) 1px,
-                    transparent 1px, transparent 3px
-                );
-            background-size: 100% 4px, 3px 100%;
-        }
-        #cam-static.flash { animation: cam-static-anim 0.25s ease-out forwards; }
-        @keyframes cam-static-anim {
-            0%   { opacity: 1; }
-            100% { opacity: 0; }
-        }
-
-        body.power-out #room-img      { filter: brightness(0.1) !important; }
-        body.power-out .door-wrap     { filter: brightness(0.1) !important; }
-
-        /* ── TIME HUD ── */
-        #time-hud {
-            position: fixed;
-            top: 4vh;
-            right: 3vw;
-            z-index: 60;
-            text-align: right;
-            pointer-events: none;
-            font-family: 'Oswald', sans-serif;
-            text-shadow: 0 0 8px rgba(0,0,0,0.95);
-            line-height: 1.3;
-        }
-        #time-display {
-            font-size: clamp(20px, 2.6vw, 40px);
-            font-weight: 700;
-            color: #e8e8c8;
-            letter-spacing: 0.06em;
-        }
-        #night-display {
-            font-size: clamp(11px, 1.3vw, 20px);
-            font-weight: 400;
-            color: rgba(210,210,185,0.65);
-            letter-spacing: 0.12em;
-        }
-
-        /* ── HOVER ZONES ── */
-        #zone-left, #zone-right {
-            position: fixed;
-            top: 0;
-            width: 20%;
-            height: 100%;
-            z-index: 10;
-        }
-        #zone-left  { left: 0; }
-        #zone-right { right: 0; }
-
-        /* ── CUSTOM CURSOR ── */
-        #cursor {
-            position: fixed;
-            width: 18px; height: 18px;
-            border: 2px solid rgba(255, 200, 80, 0.7);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 400;
-            transform: translate(-50%, -50%);
-            transition: border-color 0.15s, transform 0.08s, box-shadow 0.15s;
-            box-shadow: 0 0 7px rgba(255, 180, 30, 0.4);
-        }
-        #cursor.turning {
-            border-color: rgba(255, 160, 20, 1);
-            transform: translate(-50%, -50%) scale(1.5);
-            box-shadow: 0 0 14px rgba(255, 160, 20, 0.8);
-        }
-        #cursor.hovering {
-            border-color: rgba(60, 255, 100, 0.9);
-            box-shadow: 0 0 14px rgba(40, 220, 80, 0.7);
-        }
-
-        /* ── PAUSE MENU ── */
-        #pause-menu {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.82);
-            z-index: 150;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 28px;
-        }
-        #pause-menu.open { display: flex; }
-
-        #pause-menu h2 {
-            font-family: 'Creepster', cursive;
-            font-size: clamp(28px, 5vw, 52px);
-            color: #c8860a;
-            text-shadow: 0 0 20px rgba(200, 130, 10, 0.8);
-            letter-spacing: 4px;
-            margin-bottom: 10px;
-        }
-
-        .pause-btn {
-            font-family: 'Oswald', sans-serif;
-            font-size: clamp(16px, 2.2vw, 24px);
-            letter-spacing: 5px;
-            text-transform: uppercase;
-            color: #b07010;
-            background: transparent;
-            border: 2px solid #5a3008;
-            padding: 12px 50px;
-            cursor: none;
-            transition: all 0.15s;
-        }
-        .pause-btn:hover {
-            color: #ffcc44;
-            border-color: #c8860a;
-            background: rgba(80, 40, 0, 0.4);
-            text-shadow: 0 0 14px rgba(255, 200, 50, 0.8);
-        }
-    </style>
+    /* ─────────── SECRET VIDEO ─────────── */
+    #secret-vid{position:fixed;inset:0;width:100%;height:100%;object-fit:contain;z-index:200;background:#000;display:none}
+  </style>
 </head>
 <body>
+  <!-- overlays -->
+  <canvas id="noise"></canvas>
+  <div id="scanlines"></div>
+  <div id="vignette"></div>
 
-<div id="main-menu">
-    <img id="menu-bg-img" src="stuart.png" alt="Stuart Silhouette">
-    <div id="menu-static"></div>
-    <div class="menu-content">
-        <h1 class="menu-title">FIVE<br>NIGHTS<br>AT STUART'S</h1>
-        <div class="menu-options">
-            <button class="menu-btn" id="btn-new-game">New Game</button>
-            <button class="menu-btn" id="btn-continue">Continue</button>
-        </div>
-    </div>
-    <div class="menu-copyright">© Scott Cawthon / Fan Remake</div>
-</div>
+  <!-- title -->
+  <div class="title-block">
+    <div class="title-line">FIVE NIGHTS</div>
+    <div class="title-line">AT STUARTS</div>
+    <div class="title-num">2</div>
+  </div>
 
-<div id="room-wrapper">
-    <img id="room-img" src="room.png" alt="Office">
-    <div id="camera-btn" title="Cameras"></div>
-</div>
+  <!-- menu options -->
+  <ul id="menu">
+    <li id="menu-new"      class="active selected">New Game</li>
+    <li id="menu-continue" class="inactive">Continue</li>
+  </ul>
 
-<div id="door-left"  class="door-wrap open">
-    <img class="door-img img-open"   src="door_open_left.png" alt="">
-    <img class="door-img img-closed" src="door_closed.png"    alt="">
-</div>
-<div id="door-right" class="door-wrap open">
-    <img class="door-img img-open"   src="door_open.png"   alt="">
-    <img class="door-img img-closed" src="door_closed.png" alt="">
-</div>
+  <!-- bottom-right hint -->
+  <div id="hint">PRESS & HOLD DELETE TO RESET DATA</div>
 
-<div id="dark-overlay"></div>
-<canvas id="noise"></canvas>
-<div id="vignette"></div>
-<div id="scanlines"></div>
+  <!-- big character silhouette -->
+  <img src="/stuart.png" alt="Stuart silhouette" class="stuart-silhouette">
 
-<div id="zone-left"></div>
-<div id="zone-right"></div>
+  <!-- flash overlay for transitions -->
+  <div id="flash"></div>
 
-<div id="cursor"></div>
+  <!-- secret unpausable video -->
+  <video id="secret-vid" src="crucifix.mp4" playsinline></video>
 
-<div id="power-hud">
-    <div class="hud-label">Power left: <span class="hud-value" id="power-pct">100</span>%</div>
-    <div class="hud-label">Usage:</div>
-    <div id="power-bars">
-        <div class="power-bar on"></div>
-        <div class="power-bar"></div>
-        <div class="power-bar"></div>
-        <div class="power-bar"></div>
-        <div class="power-bar"></div>
-    </div>
-</div>
+  <!-- background ambience -->
+  <audio id="menu-music" src="menu_music.mp3" loop></audio>
 
-<div id="camera-ui">
-    <div id="cam-feed">
-        <div id="cam-feed-screen"></div>
-        <img id="cam-feed-img" src="" alt="">
-        <img id="bonnie-overlay" src="bonnie.png" alt="">
-        <img id="chica-overlay"  src="chica.png"  alt="">
-        <img id="foxy-overlay"   src="foxy.png"   alt="">
-        <img id="freddy-overlay" src="freddy.png" alt="">
-        <img id="wfreddy-overlay"  src="withered_freddy.png"      alt="">
-        <img id="bb-overlay"     src="balloonboy.png" alt="">
-        <img id="puppet-overlay" src="puppet.png"     alt="">
-        <div id="cam-static"></div>
-        <div id="cam-disabled-text">CAMERA DISABLED</div>
-        <div id="cam-label">CAM 09</div>
-        <div id="cam-rec">● REC</div>
+  <script>
+    /* ────── NOISE CANVAS ────── */
+    const noiseCanvas=document.getElementById('noise');
+    const nCtx=noiseCanvas.getContext('2d');
+    function sizeNoise(){noiseCanvas.width=innerWidth;noiseCanvas.height=innerHeight}
+    sizeNoise();addEventListener('resize',sizeNoise);
+    function drawNoise(){const {width:w,height:h}=noiseCanvas;const id=nCtx.createImageData(w,h);for(let i=0;i<id.data.length;i+=4){const v=Math.random()*255;id.data[i]=id.data[i+1]=id.data[i+2]=v;id.data[i+3]=255}nCtx.putImageData(id,0,0)}
+    setInterval(drawNoise,90);
 
-        <div id="cam-map">
-            <svg viewBox="0 0 300 250" width="390" height="320" xmlns="http://www.w3.org/2000/svg">
-              <line class="map-line" x1="55"  y1="40"  x2="55"  y2="55"/>
-              <line class="map-line" x1="55"  y1="95"  x2="55"  y2="110"/>
-              <line class="map-line" x1="55"  y1="150" x2="55"  y2="165"/>
-              <line class="map-line" x1="245" y1="40"  x2="245" y2="55"/>
-              <line class="map-line" x1="245" y1="95"  x2="245" y2="110"/>
-              <line class="map-line" x1="150" y1="145" x2="150" y2="160"/>
-              <line class="map-line" x1="150" y1="185" x2="150" y2="200"/>
+    /* ────── MENU LOGIC ────── */
+    const newBtn=document.getElementById('menu-new');
+    const contBtn=document.getElementById('menu-continue');
+    const flash=document.getElementById('flash');
+    const menuItems=[newBtn,contBtn];
+    let sel=0;function updateMenu(){menuItems.forEach((li,i)=>li.classList.toggle('selected',i===sel))}
+    addEventListener('keydown',e=>{if(secretActive) return; // ignore during secret video
+      if(['ArrowUp','w','W'].includes(e.key)){sel=(sel-1+menuItems.length)%menuItems.length;updateMenu()}if(['ArrowDown','s','S'].includes(e.key)){sel=(sel+1)%menuItems.length;updateMenu()}if(e.key==='Enter'||e.key===' '){activate(menuItems[sel])}if(e.key==='Delete'){holdReset=true}});
+    addEventListener('keyup',e=>{if(e.key==='Delete'){holdReset=false;resetHold=0}});
+    menuItems.forEach(li=>li.addEventListener('mouseover',()=>{sel=menuItems.indexOf(li);updateMenu()}));
+    menuItems.forEach(li=>li.addEventListener('click',()=>activate(li)));
+    function activate(li){if(li.id==='menu-new'){transition(()=>location.href='/game.html')}else if(li.id==='menu-continue'&&li.classList.contains('active')){const n=contBtn.dataset.night||1;transition(()=>location.href=`/game.html?night=${n}`)}}
+    function transition(cb){flash.style.opacity='1';setTimeout(cb,140)}
+    /* continue save */
+    const saved=parseInt(localStorage.getItem('fnafSaveNight')||'0');if(saved>1){contBtn.classList.remove('inactive');contBtn.classList.add('active');contBtn.dataset.night=saved}
+    /* reset data by holding Delete */
+    let holdReset=false,resetHold=0;setInterval(()=>{if(holdReset){resetHold+=100;if(resetHold>2000){localStorage.removeItem('fnafSaveNight');location.reload()}}else{resetHold=0}},100);
 
-              <g class="map-room" data-cam="01">
-                <rect x="20"  y="20"  width="70" height="30" rx="2"/>
-                <text class="map-id"   x="55"  y="32">01</text>
-                <text class="map-name" x="55"  y="43">Party Rm 1</text>
-              </g>
-              <g class="map-room" data-cam="02">
-                <rect x="20"  y="75"  width="70" height="30" rx="2"/>
-                <text class="map-id"   x="55"  y="87">02</text>
-                <text class="map-name" x="55"  y="98">Party Rm 2</text>
-              </g>
-              <g class="map-room" data-cam="03">
-                <rect x="20"  y="130" width="70" height="30" rx="2"/>
-                <text class="map-id"   x="55"  y="142">03</text>
-                <text class="map-name" x="55"  y="153">Party Rm 3</text>
-              </g>
-              <g class="map-room" data-cam="04">
-                <rect x="20"  y="185" width="70" height="30" rx="2"/>
-                <text class="map-id"   x="55"  y="197">04</text>
-                <text class="map-name" x="55"  y="208">Party Rm 4</text>
-              </g>
+    /* ────── AMBIENT MUSIC ────── */
+    const music=document.getElementById('menu-music');music.volume=.45;music.play().catch(()=>{const starter=()=>{music.play().catch(()=>{});removeEventListener('click',starter);removeEventListener('keydown',starter)};addEventListener('click',starter);addEventListener('keydown',starter)});
 
-              <g class="map-room" data-cam="05">
-                <rect x="90" y="210" width="50" height="25" rx="2"/>
-                <text class="map-id"   x="115" y="222">05</text>
-                <text class="map-name" x="115" y="232">L-Vent</text>
-              </g>
-              <g class="map-room" data-cam="06">
-                <rect x="160" y="210" width="50" height="25" rx="2"/>
-                <text class="map-id"   x="185" y="222">06</text>
-                <text class="map-name" x="185" y="232">R-Vent</text>
-              </g>
-
-              <g class="map-room" data-cam="07">
-                <rect x="115" y="25"  width="70" height="40" rx="2"/>
-                <text class="map-id"   x="150" y="40">07</text>
-                <text class="map-name" x="150" y="55">Parts / Svc</text>
-              </g>
-              <g class="map-room" data-cam="08">
-                <rect x="115" y="90"  width="70" height="40" rx="2"/>
-                <text class="map-id"   x="150" y="105">08</text>
-                <text class="map-name" x="150" y="120">Main Hall</text>
-              </g>
-
-              <g class="map-room" data-cam="09">
-                <rect x="210" y="20"  width="70" height="30" rx="2"/>
-                <text class="map-id"   x="245" y="32">09</text>
-                <text class="map-name" x="245" y="43">Show Stage</text>
-              </g>
-              <g class="map-room" data-cam="10">
-                <rect x="210" y="75"  width="70" height="30" rx="2"/>
-                <text class="map-id"   x="245" y="87">10</text>
-                <text class="map-name" x="245" y="98">Game Area</text>
-              </g>
-              <g class="map-room" data-cam="11">
-                <rect x="210" y="130" width="70" height="30" rx="2"/>
-                <text class="map-id"   x="245" y="142">11</text>
-                <text class="map-name" x="245" y="153">Prize Corner</text>
-              </g>
-              <g class="map-room" data-cam="12">
-                <rect x="210" y="185" width="70" height="30" rx="2"/>
-                <text class="map-id"   x="245" y="197">12</text>
-                <text class="map-name" x="245" y="208">Kid’s Cove</text>
-              </g>
-
-              <rect class="map-office-rect" x="120" y="240" width="60" height="20" rx="2"/>
-              <text class="map-office-label" x="150" y="250">★ OFFICE ★</text>
-            </svg>
-        </div>
-    </div>
-    <div id="cam-controls">
-        <div id="cam-selector">
-            <button class="cam-btn active" data-cam="09">CAM 09</button>
-            <button class="cam-btn" data-cam="11">CAM 11</button>
-            <button class="cam-btn" data-cam="10">CAM 10</button>
-            <button class="cam-btn" data-cam="07">CAM 07</button>
-            <button class="cam-btn" data-cam="08">CAM 08</button>
-            <button class="cam-btn" data-cam="01">CAM 01</button>
-            <button class="cam-btn" data-cam="02">CAM 02</button>
-            <button class="cam-btn" data-cam="03">CAM 03</button>
-            <button class="cam-btn" data-cam="04">CAM 04</button>
-            <button class="cam-btn" data-cam="05">CAM 05</button>
-            <button class="cam-btn" data-cam="06">CAM 06</button>
-            <button class="cam-btn" data-cam="12">CAM 12</button>
-        </div>
-        <div id="cam-lower-row">
-            <button id="btn-lower-cam">[ Lower Cameras ]</button>
-        </div>
-    </div>
-</div>
-
-<div id="night5-ending">
-    <video id="night5-video" src="night5_ending.mp4" playsinline></video>
-</div>
-
-<div id="morning-screen">
-    <div id="morning-night-label">6 AM</div>
-    <button id="btn-save-continue">SAVE AND CONTINUE</button>
-</div>
-
-<button id="btn-light">LIGHT</button>
-
-<div id="light-flash"></div>
-
-<div id="door-peek">
-    <img id="door-peek-img" src="bonnie.png" alt="">
-</div>
-
-<div id="jumpscare-overlay">
-    <img id="jumpscare-img" src="bonnie.png" alt="">
-    <div id="death-screen">
-        <img id="gideon-img" src="gideon.png" alt="">
-        <div id="death-text"></div>
-    </div>
-</div>
-
-<div id="time-hud">
-    <div id="time-display">12 AM</div>
-    <div id="night-display">Night 1</div>
-</div>
-
-<div id="pause-menu">
-    <h2>PAUSED</h2>
-    <button class="pause-btn" id="btn-resume">Resume</button>
-    <button class="pause-btn" id="btn-quit">Main Menu</button>
-</div>
-
-<script>
-    const mainMenu = document.getElementById('main-menu');
-    const btnNewGame = document.getElementById('btn-new-game');
-    const btnContinue = document.getElementById('btn-continue');
-
-    btnNewGame.addEventListener('click', () => {
-        mainMenu.style.display = 'none';
-        startGame(1);
+    /* ────── SECRET WORD TRIGGER ────── */
+    const secretVid=document.getElementById('secret-vid');
+    let keyBuffer='';
+    let secretActive=false;
+    addEventListener('keydown',e=>{
+      if(secretActive) return; // ignore while video playing
+      if(e.key.length===1){keyBuffer+=(e.key.toLowerCase());if(keyBuffer.length>6) keyBuffer=keyBuffer.slice(-6);
+        if(keyBuffer==='stuart') triggerSecret();}
     });
 
-    btnContinue.addEventListener('click', () => {
-        const savedNight = parseInt(localStorage.getItem('fnaf_night') || '1');
-        mainMenu.style.display = 'none';
-        startGame(savedNight);
-    });
-
-    function startGame(nightNum) {
-        console.log("Starting Night " + nightNum);
+    function triggerSecret(){
+      secretActive=true;
+      // pause music and hide everything except video
+      music.pause();
+      Array.from(document.body.children).forEach(el=>{if(el.id!=='secret-vid'){el.style.display='none';}});
+      secretVid.style.display='block';
+      secretVid.currentTime=0;
+      secretVid.play().catch(()=>{});
+      secretVid.onended=()=>{
+        // restore UI
+        Array.from(document.body.children).forEach(el=>{if(el.id!=='secret-vid'){el.style.display='';}});
+        secretVid.style.display='none';
+        secretActive=false;
+        music.play().catch(()=>{});
+        keyBuffer=''; // reset buffer so the sequence can be done again later if desired
+      };
     }
-</script>
+  </script>
 </body>
 </html>
