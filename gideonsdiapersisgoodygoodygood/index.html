@@ -99,7 +99,7 @@
     addEventListener('keyup',e=>{if(e.key==='Delete'){holdReset=false;resetHold=0}});
     menuItems.forEach(li=>li.addEventListener('mouseover',()=>{sel=menuItems.indexOf(li);updateMenu()}));
     menuItems.forEach(li=>li.addEventListener('click',()=>activate(li)));
-    function activate(li){if(li.id==='menu-new'){transition(()=>location.href='/game.html')}else if(li.id==='menu-continue'&&li.classList.contains('active')){const n=contBtn.dataset.night||1;transition(()=>location.href=`/game.html?night=${n}`)}}
+    function activate(li){if(li.id==='menu-new'){transition(()=>location.href='/gideonsdiapersisgoodygoodygood/game.html')}else if(li.id==='menu-continue'&&li.classList.contains('active')){const n=contBtn.dataset.night||1;transition(()=>location.href=`/gideonsdiapersisgoodygoodygood/game.html?night=${n}`)}}
     function transition(cb){flash.style.opacity='1';setTimeout(cb,140)}
     /* continue save */
     const saved=parseInt(localStorage.getItem('fnafSaveNight')||'0');if(saved>1){contBtn.classList.remove('inactive');contBtn.classList.add('active');contBtn.dataset.night=saved}
