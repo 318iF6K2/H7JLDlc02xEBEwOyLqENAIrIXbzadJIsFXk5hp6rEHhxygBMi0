@@ -1,0 +1,1870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Five Night's At Stuarts</title>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #000;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            font-family: 'Oswald', sans-serif;
+            user-select: none;
+            cursor: none;
+        }
+
+        /* ── ROOM WRAPPER (moves together with hotspots) ── */
+        #room-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 280vw;
+            height: 100vh;
+            transform: translateX(-90vw) scale(0.6);
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+        }
+
+        #room-img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            filter: brightness(0.5);
+        }
+
+        /* ── CAMERA HOTSPOT (box near door) ── */
+        #camera-btn {
+            position: absolute;
+            /* Table near right wall */
+            left: 50%;
+            top: 28%;
+            width: 9%;
+            height: 30%;
+            cursor: none;
+            z-index: 8;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── OVERLAYS ── */
+        #vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center,
+                transparent 38%, rgba(0,0,0,0.72) 100%);
+            pointer-events: none;
+            z-index: 5;
+        }
+        #scanlines {
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                to bottom, transparent, transparent 2px,
+                rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
+            );
+            pointer-events: none;
+            z-index: 6;
+        }
+        #noise {
+            position: fixed;
+            inset: 0;
+            z-index: 4;
+            pointer-events: none;
+            opacity: 0.035;
+        }
+        #dark-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.26);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* ── SIDE DOORS ── */
+        .door-wrap {
+            position: fixed;
+            top: 20vh;
+            height: 60vh;
+            width: 16%;
+            z-index: 2;
+            cursor: none;
+            pointer-events: none;
+            filter: brightness(0.5);
+            transition: left  0.5s cubic-bezier(0.25,0.46,0.45,0.94),
+                        right 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
+        }
+        #door-left  { left: -18%; }
+        #door-right { right: -16%; }
+        #door-left.visible  { left: 18%;  pointer-events: auto; }
+        #door-right.visible { right: 13%; pointer-events: auto; }
+
+        /* Images inside wrappers */
+        .door-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+        }
+        /* Baked-in transforms — never change at runtime */
+        #door-left  .img-open   { transform: scaleX(-1); }
+        #door-right .img-closed { transform: scaleX(-1); }
+
+        /* Toggle visibility */
+        .door-wrap .img-open   { display: none; }
+        .door-wrap .img-closed { display: block; }
+        .door-wrap.open .img-open   { display: block; }
+        .door-wrap.open .img-closed { display: none; }
+
+        /* ── POWER HUD ── */
+        #power-hud {
+            position: fixed;
+            bottom: 22vh;
+            left: 2.5vw;
+            z-index: 60;
+            pointer-events: none;
+            font-family: 'Oswald', sans-serif;
+            color: #e8e8c8;
+            text-shadow: 0 0 6px rgba(0,0,0,0.9);
+            line-height: 1.5;
+        }
+        #power-hud .hud-label {
+            font-size: clamp(12px, 1.4vw, 20px);
+            font-weight: 400;
+            letter-spacing: 0.04em;
+        }
+        #power-hud .hud-value {
+            font-size: clamp(14px, 1.7vw, 24px);
+            font-weight: 700;
+        }
+        #power-bars {
+            display: flex;
+            gap: 3px;
+            margin-top: 3px;
+        }
+        .power-bar {
+            width: clamp(10px, 1.2vw, 18px);
+            height: clamp(14px, 1.8vw, 26px);
+            border: 1px solid rgba(160,255,176,0.5);
+            background: transparent;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        #power-hud.usage-3 .power-bar { border-color: rgba(255,238,68,0.5); }
+        #power-hud.usage-4 .power-bar { border-color: rgba(255,153,34,0.5); }
+        #power-hud.usage-5 .power-bar { border-color: rgba(255,51,51,0.5); }
+        /* Usage colour themes */
+        #power-hud.usage-1 { color: #a0ffb0; }
+        #power-hud.usage-2 { color: #a0ffb0; }
+        #power-hud.usage-3 { color: #ffee44; }
+        #power-hud.usage-4 { color: #ff9922; }
+        #power-hud.usage-5 { color: #ff3333; }
+
+        .power-bar.on { background: #a0ffb0; box-shadow: 0 0 6px #60ff80; }
+        #power-hud.usage-3 .power-bar.on { background: #ffee44; box-shadow: 0 0 6px #ffe000; }
+        #power-hud.usage-4 .power-bar.on { background: #ff9922; box-shadow: 0 0 6px #ff7700; }
+        #power-hud.usage-5 .power-bar.on { background: #ff3333; box-shadow: 0 0 6px #ff0000; }
+
+        /* ── CAMERA UI ── */
+        #camera-ui {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            background: #000;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
+            cursor: none;
+        }
+        #camera-ui.open { transform: translateY(0); }
+
+        /* Feed area */
+        #cam-feed {
+            flex: 1;
+            position: relative;
+            background: #000;
+            overflow: hidden;
+        }
+        #cam-feed-screen {
+            position: absolute;
+            inset: 0;
+            background: #000;
+        }
+        /* Green static tint */
+        #cam-feed::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(40,255,80,0.03);
+            pointer-events: none;
+            z-index: 2;
+        }
+        /* Scanlines on feed */
+        #cam-feed::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                to bottom, transparent, transparent 2px,
+                rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 4px
+            );
+            pointer-events: none;
+            z-index: 3;
+        }
+        /* Camera label */
+        #cam-label {
+            position: absolute;
+            top: 14px;
+            left: 20px;
+            font-family: 'Oswald', sans-serif;
+            font-size: clamp(14px, 2vw, 26px);
+            color: rgba(160,255,180,0.85);
+            text-shadow: 0 0 8px rgba(0,255,60,0.5);
+            letter-spacing: 0.1em;
+            z-index: 5;
+            pointer-events: none;
+        }
+        /* REC indicator */
+        #cam-rec {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            font-family: 'Oswald', sans-serif;
+            font-size: clamp(11px, 1.3vw, 18px);
+            color: #ff4444;
+            letter-spacing: 0.12em;
+            z-index: 5;
+            pointer-events: none;
+            animation: blink-rec 1.4s step-start infinite;
+        }
+        @keyframes blink-rec { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+
+        /* Bottom control bar */
+        #cam-controls {
+            background: rgba(10,10,10,0.95);
+            border-top: 1px solid rgba(100,200,120,0.25);
+            padding: 10px 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        /* Camera selector grid — hidden; selection is via map */
+        #cam-selector {
+            display: none;
+        }
+        .cam-btn {
+            font-family: 'Oswald', sans-serif;
+            font-size: clamp(9px, 1vw, 14px);
+            color: rgba(180,220,190,0.8);
+            background: rgba(20,30,22,0.9);
+            border: 1px solid rgba(100,200,120,0.35);
+            padding: 4px 10px;
+            letter-spacing: 0.08em;
+            cursor: none;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+        }
+        .cam-btn:hover, .cam-btn.active {
+            background: rgba(60,160,80,0.35);
+            color: #c0ffcc;
+            border-color: rgba(100,220,130,0.7);
+        }
+        /* Lower cameras row */
+        #cam-lower-row {
+            display: flex;
+            justify-content: flex-end;
+        }
+        #btn-lower-cam {
+            font-family: 'Oswald', sans-serif;
+            font-size: clamp(11px, 1.2vw, 16px);
+            color: rgba(180,220,190,0.8);
+            background: transparent;
+            border: 1px solid rgba(100,200,120,0.4);
+            padding: 5px 18px;
+            letter-spacing: 0.1em;
+            cursor: none;
+            transition: background 0.15s, color 0.15s;
+        }
+        #btn-lower-cam:hover {
+            background: rgba(60,160,80,0.25);
+            color: #c0ffcc;
+        }
+        .cam-disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            text-decoration: line-through;
+            color: rgba(255,80,80,0.6) !important;
+            border-color: rgba(255,80,80,0.25) !important;
+        }
+        /* Camera feed image */
+        #cam-feed-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+            z-index: 1;
+        }
+        /* "Camera Disabled" text for CAM 6 */
+        #cam-disabled-text {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Oswald', sans-serif;
+            font-size: clamp(18px, 3vw, 40px);
+            color: rgba(255,60,60,0.7);
+            letter-spacing: 0.15em;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        /* ── CAMERA MAP ── */
+        #cam-map {
+            position: absolute;
+            bottom: 14px;
+            right: 14px;
+            z-index: 6;
+            background: rgba(0,0,0,0.78);
+            border: 1px solid rgba(100,200,120,0.22);
+            padding: 8px;
+            pointer-events: all;
+            cursor: none;
+        }
+        #cam-map .map-room {
+            cursor: none;
+        }
+        #cam-map .map-room:not(.map-disabled) rect {
+            transition: fill 0.12s, stroke 0.12s;
+        }
+        #cam-map .map-room:not(.map-disabled):hover rect {
+            fill: rgba(40,120,60,0.45);
+            stroke: rgba(100,230,130,0.7);
+        }
+        #cam-map .map-line {
+            stroke: rgba(100,200,120,0.22);
+            stroke-width: 1.5;
+        }
+        #cam-map .map-room rect {
+            fill: rgba(20,35,24,0.9);
+            stroke: rgba(100,200,120,0.38);
+            stroke-width: 1;
+            transition: fill 0.2s, stroke 0.2s;
+        }
+        #cam-map .map-room.active rect {
+            fill: rgba(50,150,70,0.52);
+            stroke: rgba(120,255,140,0.85);
+            stroke-width: 1.5;
+        }
+        #cam-map .map-disabled rect {
+            fill: rgba(35,12,12,0.9);
+            stroke: rgba(180,50,50,0.32);
+        }
+        #cam-map .map-id {
+            font-family: 'Oswald', sans-serif;
+            font-size: 9px;
+            font-weight: 600;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            fill: rgba(155,215,170,0.75);
+            letter-spacing: 0.07em;
+        }
+        #cam-map .map-room.active .map-id { fill: #b8ffd0; }
+        #cam-map .map-disabled .map-id    { fill: rgba(200,70,70,0.65); }
+        #cam-map .map-name {
+            font-family: 'Oswald', sans-serif;
+            font-size: 6.5px;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            fill: rgba(110,170,125,0.65);
+            letter-spacing: 0.04em;
+        }
+        #cam-map .map-room.active .map-name { fill: rgba(180,255,200,0.9); }
+        #cam-map .map-disabled .map-name    { fill: rgba(160,50,50,0.55); }
+        #cam-map .map-office-rect {
+            fill: rgba(40,35,18,0.9);
+            stroke: rgba(180,160,60,0.38);
+            stroke-width: 1;
+        }
+        #cam-map .map-office-label {
+            font-family: 'Oswald', sans-serif;
+            font-size: 8px;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            fill: rgba(200,178,70,0.65);
+            letter-spacing: 0.12em;
+        }
+
+        /* ── LIGHT BUTTON ── */
+        #btn-light {
+            position: fixed;
+            bottom: 6vh;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 30;
+            display: none;
+            font-family: 'Oswald', sans-serif;
+            font-size: clamp(13px, 1.6vw, 22px);
+            letter-spacing: 0.14em;
+            color: rgba(255,240,160,0.9);
+            background: rgba(15,12,5,0.85);
+            border: 1px solid rgba(255,230,100,0.45);
+            padding: 7px 26px;
+            cursor: none;
+            transition: background 0.1s, opacity 0.2s;
+        }
+        #btn-light.visible { display: block; }
+        #btn-light.cooldown { opacity: 0.35; pointer-events: none; }
+        #btn-light:hover { background: rgba(50,45,10,0.9); }
+
+        /* ── LIGHT FLASH ── */
+        #light-flash {
+            position: fixed;
+            inset: 0;
+            z-index: 28;
+            background: rgba(255,245,200,0.14);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.04s;
+        }
+        #light-flash.on { opacity: 1; }
+
+        /* ── DOOR PEEK (character visible under light) ── */
+        #door-peek {
+            position: fixed;
+            top: 12vh;
+            height: 76vh;
+            width: 22vw;
+            z-index: 29;
+            display: none;
+            overflow: hidden;
+        }
+        #door-peek.left  { left: 14vw; }
+        #door-peek.right { right: 14vw; }
+        #door-peek img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+        }
+
+        /* ── MORNING / 6 AM SCREEN ── */
+        /* ── NIGHT 5 ENDING VIDEO ── */
+        #night5-ending {
+            position: fixed;
+            inset: 0;
+            z-index: 160;
+            background: #000;
+            display: none;
+        }
+        #night5-ending.show { display: block; }
+        #night5-ending video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        #morning-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 150;
+            background: #000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 44px;
+            opacity: 0;
+            transition: opacity 2.5s ease;
+        }
+        #morning-screen.show  { display: flex; }
+        #morning-screen.fade  { opacity: 1; }
+        #morning-night-label {
+            font-family: 'Oswald', sans-serif;
+            font-size: clamp(20px, 3.5vw, 50px);
+            color: rgba(255,255,255,0.55);
+            letter-spacing: 0.3em;
+        }
+        #btn-save-continue {
+            font-family: 'Oswald', sans-serif;
+            font-size: clamp(14px, 1.8vw, 26px);
+            letter-spacing: 0.22em;
+            color: #fff;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.4);
+            padding: 14px 46px;
+            cursor: none;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        #btn-save-continue:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.9);
+        }
+
+        /* ── JUMPSCARE ── */
+        #jumpscare-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: #000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        #jumpscare-overlay.active { display: flex; }
+        #jumpscare-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            animation: js-shake 0.08s steps(2) infinite;
+        }
+        @keyframes js-shake {
+            0%   { transform: translate(-10px, -6px)  rotate(-3deg) scale(1.08); }
+            25%  { transform: translate(10px,  7px)   rotate(3deg)  scale(1.04); }
+            50%  { transform: translate(-7px,  10px)  rotate(-2deg) scale(1.1);  }
+            75%  { transform: translate(7px,  -9px)   rotate(2deg)  scale(1.05); }
+            100% { transform: translate(-10px, -6px)  rotate(-3deg) scale(1.08); }
+        }
+
+        /* ── DEATH SCREEN ── */
+        #death-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 28px;
+        }
+        #death-screen.visible { display: flex; }
+        #gideon-img {
+            width: clamp(100px, 14vw, 200px);
+            height: clamp(100px, 14vw, 200px);
+            object-fit: contain;
+        }
+        #death-text {
+            font-family: 'Oswald', sans-serif;
+            font-size: clamp(16px, 2.4vw, 34px);
+            color: #fff;
+            letter-spacing: 0.14em;
+            text-align: center;
+            max-width: 80vw;
+            opacity: 0;
+            transition: opacity 0.45s;
+        }
+        #death-text.visible { opacity: 1; }
+
+        /* ── BONNIE OVERLAY ── */
+        #bonnie-overlay, #chica-overlay, #foxy-overlay, #freddy-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            max-height: 90%;
+            max-width: 75%;
+            object-fit: contain;
+            z-index: 2;
+            display: none;
+            pointer-events: none;
+        }
+        #bonnie-overlay {
+            filter: sepia(0.4) hue-rotate(85deg) brightness(0.65) contrast(1.1);
+        }
+        #chica-overlay {
+            filter: sepia(0.7) hue-rotate(0deg) saturate(2.2) brightness(0.6) contrast(1.2);
+        }
+        #foxy-overlay {
+            filter: brightness(0.7) saturate(1.4) contrast(1.15);
+        }
+        #freddy-overlay {
+            filter: brightness(0.65) sepia(0.3) contrast(1.1);
+        }
+
+        /* ── CAMERA STATIC FLASH ── */
+        #cam-static {
+            position: absolute;
+            inset: 0;
+            z-index: 7;
+            pointer-events: none;
+            opacity: 0;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px,
+                    transparent 1px, transparent 4px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(120,255,160,0.06) 0px, rgba(0,0,0,0.12) 1px,
+                    transparent 1px, transparent 3px
+                );
+            background-size: 100% 4px, 3px 100%;
+        }
+        #cam-static.flash {
+            animation: cam-static-anim 0.25s ease-out forwards;
+        }
+        @keyframes cam-static-anim {
+            0%   { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Power-out state: dim everything to 10% */
+        body.power-out #room-img      { filter: brightness(0.1) !important; }
+        body.power-out .door-wrap     { filter: brightness(0.1) !important; }
+
+        /* ── TIME HUD ── */
+        #time-hud {
+            position: fixed;
+            top: 4vh;
+            right: 3vw;
+            z-index: 60;
+            text-align: right;
+            pointer-events: none;
+            font-family: 'Oswald', sans-serif;
+            text-shadow: 0 0 8px rgba(0,0,0,0.95);
+            line-height: 1.3;
+        }
+        #time-display {
+            font-size: clamp(20px, 2.6vw, 40px);
+            font-weight: 700;
+            color: #e8e8c8;
+            letter-spacing: 0.06em;
+        }
+        #night-display {
+            font-size: clamp(11px, 1.3vw, 20px);
+            font-weight: 400;
+            color: rgba(210,210,185,0.65);
+            letter-spacing: 0.12em;
+        }
+
+        /* ── HOVER ZONES ── */
+        #zone-left, #zone-right {
+            position: fixed;
+            top: 0;
+            width: 20%;
+            height: 100%;
+            z-index: 10;
+        }
+        #zone-left  { left: 0; }
+        #zone-right { right: 0; }
+
+        /* ── CUSTOM CURSOR ── */
+        #cursor {
+            position: fixed;
+            width: 18px; height: 18px;
+            border: 2px solid rgba(255, 200, 80, 0.7);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 200;
+            transform: translate(-50%, -50%);
+            transition: border-color 0.15s, transform 0.08s, box-shadow 0.15s;
+            box-shadow: 0 0 7px rgba(255, 180, 30, 0.4);
+        }
+        #cursor.turning {
+            border-color: rgba(255, 160, 20, 1);
+            transform: translate(-50%, -50%) scale(1.5);
+            box-shadow: 0 0 14px rgba(255, 160, 20, 0.8);
+        }
+        #cursor.hovering {
+            border-color: rgba(60, 255, 100, 0.9);
+            box-shadow: 0 0 14px rgba(40, 220, 80, 0.7);
+        }
+
+        /* ── PAUSE MENU ── */
+        #pause-menu {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.82);
+            z-index: 150;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 28px;
+        }
+        #pause-menu.open { display: flex; }
+
+        #pause-menu h2 {
+            font-family: 'Creepster', cursive;
+            font-size: clamp(28px, 5vw, 52px);
+            color: #c8860a;
+            text-shadow: 0 0 20px rgba(200, 130, 10, 0.8);
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+        }
+
+        .pause-btn {
+            font-family: 'Oswald', sans-serif;
+            font-size: clamp(16px, 2.2vw, 24px);
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: #b07010;
+            background: transparent;
+            border: 2px solid #5a3008;
+            padding: 12px 50px;
+            cursor: none;
+            transition: all 0.15s;
+        }
+        .pause-btn:hover {
+            color: #ffcc44;
+            border-color: #c8860a;
+            background: rgba(80, 40, 0, 0.4);
+            text-shadow: 0 0 14px rgba(255, 200, 50, 0.8);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Room (wrapper moves so hotspots stay with image) -->
+<div id="room-wrapper">
+    <img id="room-img" src="/room.png" alt="Office">
+    <!-- Camera hotspot: box near door -->
+    <div id="camera-btn" title="Cameras"></div>
+</div>
+
+<!-- Side doors -->
+<div id="door-left"  class="door-wrap open">
+    <img class="door-img img-open"   src="door_open_left.png" alt="">
+    <img class="door-img img-closed" src="door_closed.png"    alt="">
+</div>
+<div id="door-right" class="door-wrap open">
+    <img class="door-img img-open"   src="door_open.png"   alt="">
+    <img class="door-img img-closed" src="door_closed.png" alt="">
+</div>
+
+<!-- Fixed overlays -->
+<div id="dark-overlay"></div>
+<canvas id="noise"></canvas>
+<div id="vignette"></div>
+<div id="scanlines"></div>
+
+<!-- Hover zones -->
+<div id="zone-left"></div>
+<div id="zone-right"></div>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+
+<!-- Power HUD -->
+<div id="power-hud">
+    <div class="hud-label">Power left: <span class="hud-value" id="power-pct">100</span>%</div>
+    <div class="hud-label">Usage:</div>
+    <div id="power-bars">
+        <div class="power-bar on"></div>
+        <div class="power-bar"></div>
+        <div class="power-bar"></div>
+        <div class="power-bar"></div>
+        <div class="power-bar"></div>
+    </div>
+</div>
+
+<!-- Camera UI -->
+<div id="camera-ui">
+    <div id="cam-feed">
+        <div id="cam-feed-screen"></div>
+        <img id="cam-feed-img" src="" alt="">
+        <img id="bonnie-overlay" src="bonnie.png" alt="">
+        <img id="chica-overlay"  src="chica.png"  alt="">
+        <img id="foxy-overlay"   src="foxy.png"   alt="">
+        <img id="freddy-overlay" src="freddy.png" alt="">
+        <img id="wfreddy-overlay"  src="withered_freddy.png"      alt=""> <!-- Withered Freddy (reuse sprite) -->
+        <img id="bb-overlay"     src="balloonboy.png" alt="">
+        <img id="puppet-overlay" src="puppet.png"     alt="">
+        <div id="cam-static"></div>
+        <div id="cam-disabled-text">CAMERA DISABLED</div>
+        <div id="cam-label">CAM 09</div>
+        <div id="cam-rec">● REC</div>
+
+        <!-- Floor-plan map -->
+        <div id="cam-map">
+            <svg viewBox="0 0 300 250" width="390" height="320" xmlns="http://www.w3.org/2000/svg">
+
+              <!-- connector lines -->
+              <line class="map-line" x1="55"  y1="40"  x2="55"  y2="55"/>
+              <line class="map-line" x1="55"  y1="95"  x2="55"  y2="110"/>
+              <line class="map-line" x1="55"  y1="150" x2="55"  y2="165"/>
+              <line class="map-line" x1="245" y1="40"  x2="245" y2="55"/>
+              <line class="map-line" x1="245" y1="95"  x2="245" y2="110"/>
+              <line class="map-line" x1="150" y1="145" x2="150" y2="160"/>
+              <line class="map-line" x1="150" y1="185" x2="150" y2="200"/>
+
+              <!-- Party Rooms 1-4 (CAM 01-04) -->
+              <g class="map-room" data-cam="01">
+                <rect x="20"  y="20"  width="70" height="30" rx="2"/>
+                <text class="map-id"   x="55"  y="32">01</text>
+                <text class="map-name" x="55"  y="43">Party Rm 1</text>
+              </g>
+              <g class="map-room" data-cam="02">
+                <rect x="20"  y="75"  width="70" height="30" rx="2"/>
+                <text class="map-id"   x="55"  y="87">02</text>
+                <text class="map-name" x="55"  y="98">Party Rm 2</text>
+              </g>
+              <g class="map-room" data-cam="03">
+                <rect x="20"  y="130" width="70" height="30" rx="2"/>
+                <text class="map-id"   x="55"  y="142">03</text>
+                <text class="map-name" x="55"  y="153">Party Rm 3</text>
+              </g>
+              <g class="map-room" data-cam="04">
+                <rect x="20"  y="185" width="70" height="30" rx="2"/>
+                <text class="map-id"   x="55"  y="197">04</text>
+                <text class="map-name" x="55"  y="208">Party Rm 4</text>
+              </g>
+
+              <!-- Left & Right Air Vents (CAM 05-06) -->
+              <g class="map-room" data-cam="05">
+                <rect x="90" y="210" width="50" height="25" rx="2"/>
+                <text class="map-id"   x="115" y="222">05</text>
+                <text class="map-name" x="115" y="232">L-Vent</text>
+              </g>
+              <g class="map-room" data-cam="06">
+                <rect x="160" y="210" width="50" height="25" rx="2"/>
+                <text class="map-id"   x="185" y="222">06</text>
+                <text class="map-name" x="185" y="232">R-Vent</text>
+              </g>
+
+              <!-- Central stack: Parts/Service (07) & Main Hall (08) -->
+              <g class="map-room" data-cam="07">
+                <rect x="115" y="25"  width="70" height="40" rx="2"/>
+                <text class="map-id"   x="150" y="40">07</text>
+                <text class="map-name" x="150" y="55">Parts / Svc</text>
+              </g>
+              <g class="map-room" data-cam="08">
+                <rect x="115" y="90"  width="70" height="40" rx="2"/>
+                <text class="map-id"   x="150" y="105">08</text>
+                <text class="map-name" x="150" y="120">Main Hall</text>
+              </g>
+
+              <!-- Right-hand stack: Show Stage (09), Game Area (10), Prize Corner (11), Kid’s Cove (12) -->
+              <g class="map-room" data-cam="09">
+                <rect x="210" y="20"  width="70" height="30" rx="2"/>
+                <text class="map-id"   x="245" y="32">09</text>
+                <text class="map-name" x="245" y="43">Show Stage</text>
+              </g>
+              <g class="map-room" data-cam="10">
+                <rect x="210" y="75"  width="70" height="30" rx="2"/>
+                <text class="map-id"   x="245" y="87">10</text>
+                <text class="map-name" x="245" y="98">Game Area</text>
+              </g>
+              <g class="map-room" data-cam="11">
+                <rect x="210" y="130" width="70" height="30" rx="2"/>
+                <text class="map-id"   x="245" y="142">11</text>
+                <text class="map-name" x="245" y="153">Prize Corner</text>
+              </g>
+              <g class="map-room" data-cam="12">
+                <rect x="210" y="185" width="70" height="30" rx="2"/>
+                <text class="map-id"   x="245" y="197">12</text>
+                <text class="map-name" x="245" y="208">Kid’s Cove</text>
+              </g>
+
+              <!-- Office marker -->
+              <rect class="map-office-rect" x="120" y="240" width="60" height="20" rx="2"/>
+              <text class="map-office-label" x="150" y="250">★ OFFICE ★</text>
+            </svg>
+        </div>
+    </div>
+    <div id="cam-controls">
+        <div id="cam-selector">
+            <button class="cam-btn active" data-cam="09">CAM 09</button>
+            <button class="cam-btn" data-cam="11">CAM 11</button>
+            <button class="cam-btn" data-cam="10">CAM 10</button>
+            <button class="cam-btn" data-cam="07">CAM 07</button>
+            <button class="cam-btn" data-cam="08">CAM 08</button>
+            <button class="cam-btn" data-cam="01">CAM 01</button>
+            <button class="cam-btn" data-cam="02">CAM 02</button>
+            <button class="cam-btn" data-cam="03">CAM 03</button>
+            <button class="cam-btn" data-cam="04">CAM 04</button>
+            <button class="cam-btn" data-cam="05">CAM 05</button>
+            <button class="cam-btn" data-cam="06">CAM 06</button>
+            <button class="cam-btn" data-cam="12">CAM 12</button>
+        </div>
+        <div id="cam-lower-row">
+            <button id="btn-lower-cam">[ Lower Cameras ]</button>
+        </div>
+    </div>
+</div>
+
+<!-- Night 5 ending video -->
+<div id="night5-ending">
+    <video id="night5-video" src="night5_ending.mp4" playsinline></video>
+</div>
+
+<!-- 6 AM / Morning screen -->
+<div id="morning-screen">
+    <div id="morning-night-label">6 AM</div>
+    <button id="btn-save-continue">SAVE AND CONTINUE</button>
+</div>
+
+<!-- Light button -->
+<button id="btn-light">LIGHT</button>
+
+<!-- Light flash overlay -->
+<div id="light-flash"></div>
+
+<!-- Door peek (character shown during light) -->
+<div id="door-peek">
+    <img id="door-peek-img" src="bonnie.png" alt="">
+</div>
+
+<!-- Jumpscare overlay -->
+<div id="jumpscare-overlay">
+    <img id="jumpscare-img" src="bonnie.png" alt="">
+    <div id="death-screen">
+        <img id="gideon-img" src="gideon.png" alt="">
+        <div id="death-text"></div>
+    </div>
+</div>
+
+<!-- Time HUD -->
+<div id="time-hud">
+    <div id="time-display">12 AM</div>
+    <div id="night-display">Night 1</div>
+</div>
+
+<!-- Pause menu -->
+<div id="pause-menu">
+    <h2>Paused</h2>
+    <button class="pause-btn" id="btn-resume">Resume</button>
+    <button class="pause-btn" id="btn-main-menu">Return to Menu</button>
+</div>
+
+<script>
+    // ── Access guard ─────────────────────────────────────────────
+    localStorage.setItem('fnafUnlocked', 'true');
+    if (localStorage.getItem('fnafUnlocked') !== 'true') {
+        window.location.replace('/');
+    }
+
+    // ── Pan ──────────────────────────────────────────────────────
+    const OFFSETS = [-45, -90, -135]; // vw
+    let pos = 1;
+    let animating = false;
+    let paused = false;
+
+    const wrapper   = document.getElementById('room-wrapper');
+    const cursor    = document.getElementById('cursor');
+    const doorLeft  = document.getElementById('door-left');
+    const doorRight = document.getElementById('door-right');
+
+    let doorLeftOpen  = true;
+    let doorRightOpen = true;
+
+    function updateDoors() {
+        doorLeft.classList.toggle('visible',  pos === 0);
+        doorRight.classList.toggle('visible', pos === 2);
+    }
+
+    function setPos(newPos) {
+        if (newPos === pos || animating || paused) return;
+        animating = true;
+        const dir = newPos > pos ? 1 : -1;
+
+        // Fade out current doors and fade in destination door simultaneously
+        doorLeft.classList.remove('visible');
+        doorRight.classList.remove('visible');
+        if (newPos === 0) doorLeft.classList.add('visible');
+        if (newPos === 2) doorRight.classList.add('visible');
+
+        wrapper.style.transition = 'transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94)';
+        wrapper.style.transform  = `translateX(${OFFSETS[newPos]}vw) scale(0.6) scaleX(${1 + 0.012 * dir})`;
+
+        setTimeout(() => {
+            wrapper.style.transform = `translateX(${OFFSETS[newPos]}vw) scale(0.6)`;
+            pos = newPos;
+            updateLightButton();
+            setTimeout(() => { animating = false; }, 100);
+        }, 460);
+    }
+
+    // ── Door sound ────────────────────────────────────────────────
+    function playDoorSound() {
+        const snd = new Audio('door_click.mp3');
+        snd.volume = 0.3;
+        snd.play();
+    }
+
+    // ── Door click handlers ───────────────────────────────────────
+    doorLeft.addEventListener('click', () => {
+        if (powerOut) return;
+        doorLeftOpen = !doorLeftOpen;
+        doorLeft.classList.toggle('open', doorLeftOpen);
+        updatePowerUsage();
+        playDoorSound();
+    });
+    doorRight.addEventListener('click', () => {
+        if (powerOut) return;
+        doorRightOpen = !doorRightOpen;
+        doorRight.classList.toggle('open', doorRightOpen);
+        updatePowerUsage();
+        playDoorSound();
+    });
+
+    // ── Door cursor highlights ────────────────────────────────────
+    [doorLeft, doorRight].forEach(d => {
+        d.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+        d.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+    });
+
+    // ── Hover zones ──────────────────────────────────────────────
+    const zoneLeft  = document.getElementById('zone-left');
+    const zoneRight = document.getElementById('zone-right');
+
+    zoneLeft.addEventListener('mouseenter',  () => { cursor.classList.add('turning');    setPos(Math.max(0, pos - 1)); });
+    zoneLeft.addEventListener('mouseleave',  () =>   cursor.classList.remove('turning'));
+    zoneLeft.addEventListener('mousemove',   () => { if (!animating && pos > 0) setPos(pos - 1); });
+
+    zoneRight.addEventListener('mouseenter', () => { cursor.classList.add('turning');    setPos(Math.min(2, pos + 1)); });
+    zoneRight.addEventListener('mouseleave', () =>   cursor.classList.remove('turning'));
+    zoneRight.addEventListener('mousemove',  () => { if (!animating && pos < 2) setPos(pos + 1); });
+
+    // ── Camera system ─────────────────────────────────────────────
+    const CAM_DATA = {
+      '01': { name: 'Party Room 1',  img: 'cam01.png' },
+      '02': { name: 'Party Room 2',  img: 'cam02.png' },
+      '03': { name: 'Party Room 3',  img: 'cam03.png' },
+      '04': { name: 'Party Room 4',  img: 'cam04.png' },
+      '05': { name: 'Left Air Vent', img: null },         // no visible feed
+      '06': { name: 'Right Air Vent', img: null },        // no visible feed
+      '07': { name: 'Parts / Service', img: 'cam07.png' },
+      '08': { name: 'Main Hall',       img: 'cam08.png' },
+      '09': { name: 'Show Stage',      img: 'cam09.png' },
+      '10': { name: 'Game Area',       img: 'cam10.png' },
+      '11': { name: 'Prize Corner',    img: 'cam11.png' },
+      '12': { name: 'Kid’s Cove',      img: 'cam12.png' },
+    };
+
+    const camBtn          = document.getElementById('camera-btn');
+    const cameraUI        = document.getElementById('camera-ui');
+    const camLabel        = document.getElementById('cam-label');
+    const camFeedImg      = document.getElementById('cam-feed-img');
+    const camDisabledText = document.getElementById('cam-disabled-text');
+    const camBtns         = document.querySelectorAll('.cam-btn');
+    let   cameraOpen  = false;
+    let   activeCam   = '09';
+
+    const mapRooms  = document.querySelectorAll('#cam-map .map-room');
+    const camStatic = document.getElementById('cam-static');
+
+    function showStatic() {
+        camStatic.classList.remove('flash');
+        void camStatic.offsetWidth; // force reflow to restart animation
+        camStatic.classList.add('flash');
+    }
+
+    function switchCam(id) {
+        activeCam = id;
+        const data = CAM_DATA[id];
+        showStatic();
+        camLabel.textContent = `CAM ${id} — ${data.name}`;
+        camBtns.forEach(b => b.classList.remove('active'));
+        document.querySelector(`.cam-btn[data-cam="${id}"]`).classList.add('active');
+        // Highlight map room
+        mapRooms.forEach(g => g.classList.remove('active'));
+        const mapRoom = document.querySelector(`#cam-map .map-room[data-cam="${id}"]`);
+        if (mapRoom) mapRoom.classList.add('active');
+        // Update feed
+        if (data.img) {
+            camFeedImg.src = data.img;
+            camFeedImg.style.display = 'block';
+            camDisabledText.style.display = 'none';
+        } else {
+            camFeedImg.style.display = 'none';
+            camDisabledText.style.display = 'flex';
+        }
+        // Show animatronics if they're in this room
+        updateBonnieCamera();
+        updateChicaCamera();
+    }
+
+    function openCamera() {
+        if (powerOut) return;
+        cameraOpen = true;
+        cameraUI.classList.add('open');
+        showStatic();
+        switchCam(activeCam);
+        updatePowerUsage();
+        updateLightButton();
+        updateBonnieCamera();
+        updateChicaCamera();
+    }
+    function closeCamera() {
+        cameraOpen = false;
+        cameraUI.classList.remove('open');
+        updatePowerUsage();
+        updateLightButton();
+        updateBonnieCamera();
+        updateChicaCamera();
+    }
+
+    camBtn.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+    camBtn.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+    camBtn.addEventListener('click', openCamera);
+
+    document.getElementById('btn-lower-cam').addEventListener('click', closeCamera);
+
+    mapRooms.forEach(room => {
+        if (room.classList.contains('map-disabled')) return;
+        room.addEventListener('click', () => switchCam(room.dataset.cam));
+        room.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+        room.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+    });
+
+    switchCam('09');
+
+    // ── Custom cursor ────────────────────────────────────────────
+    document.addEventListener('mousemove', e => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top  = e.clientY + 'px';
+    });
+
+    // ── Arrow keys ───────────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            if (cameraOpen) { closeCamera(); return; }
+            togglePause();
+        }
+        if (paused || cameraOpen) return;
+        if (e.key === 'ArrowLeft')  setPos(Math.max(0, pos - 1));
+        if (e.key === 'ArrowRight') setPos(Math.min(2, pos + 1));
+    });
+
+    // ── Pause menu ───────────────────────────────────────────────
+    const pauseMenu = document.getElementById('pause-menu');
+
+    function togglePause() {
+        paused = !paused;
+        pauseMenu.classList.toggle('open', paused);
+    }
+
+    document.getElementById('btn-resume').addEventListener('click', () => togglePause());
+    document.getElementById('btn-main-menu').addEventListener('click', () => {
+        window.location.href = '/';
+    });
+
+    // ── Noise canvas ─────────────────────────────────────────────
+    const canvas = document.getElementById('noise');
+    const ctx    = canvas.getContext('2d');
+    function resizeCanvas() { canvas.width = innerWidth; canvas.height = innerHeight; }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    function drawNoise() {
+        const d = ctx.createImageData(canvas.width, canvas.height);
+        for (let i = 0; i < d.data.length; i += 4) {
+            const v = Math.random() * 255;
+            d.data[i] = d.data[i+1] = d.data[i+2] = v;
+            d.data[i+3] = 255;
+        }
+        ctx.putImageData(d, 0, 0);
+    }
+    setInterval(drawNoise, 90);
+
+    // ── Power system ─────────────────────────────────────────────
+    const powerPctEl = document.getElementById('power-pct');
+    const powerBarEls = Array.from(document.querySelectorAll('.power-bar'));
+    // Drain per 200ms tick to match: 1bar=9.6s, 2bar=4.8s, 3bar=3.2s, 4bar=1.9s, 5bar=0.4s
+    const DRAIN_RATES = [0, 1/48, 1/24, 1/16, 1/9.5, 0.5];
+
+    let power       = 100;   // percent
+    let powerUsage  = 1;     // 1 base + doors closed
+    let powerOut    = false;
+
+    const powerHud = document.getElementById('power-hud');
+
+    let lightOn = false;
+
+    function updatePowerUsage() {
+        const doorsClosed = (!doorLeftOpen ? 1 : 0) + (!doorRightOpen ? 1 : 0);
+        powerUsage = Math.min(5, 1 + doorsClosed + (cameraOpen ? 1 : 0) + (lightOn ? 1 : 0));
+        // Update bars
+        powerBarEls.forEach((bar, i) => {
+            bar.classList.toggle('on', i < powerUsage);
+        });
+        // Update colour class
+        for (let i = 1; i <= 5; i++) powerHud.classList.remove(`usage-${i}`);
+        powerHud.classList.add(`usage-${powerUsage}`);
+    }
+
+    function powerTick() {
+        if (paused || powerOut) return;
+        power = Math.max(0, power - DRAIN_RATES[powerUsage]);
+        const pct = Math.floor(power);
+        powerPctEl.textContent = pct;
+
+        if (power <= 0) {
+            powerOut = true;
+            document.body.classList.add('power-out');
+            powerPctEl.textContent = '0';
+            // Force-close cameras
+            if (cameraOpen) closeCamera();
+            // Force-open both doors (they can't be closed anymore)
+            doorLeftOpen  = true;
+            doorRightOpen = true;
+            doorLeft.classList.add('open');
+            doorRight.classList.add('open');
+            updatePowerUsage();
+            updateLightButton();
+        }
+    }
+
+    setInterval(powerTick, 200);
+    updatePowerUsage(); // init bars
+
+    // ── Time system ──────────────────────────────────────────────
+    // Full night = 4m 30s = 270 000 ms  →  12 AM through 6 AM (6 transitions)
+    const NIGHT_DURATION_MS = 270_000;
+    const MS_PER_HOUR       = NIGHT_DURATION_MS / 6;   // ≈ 89 166 ms per in-game hour
+    const HOUR_LABELS       = ['12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM', '6 AM'];
+
+    let gameTime  = 0;     // ms elapsed (pauses don't count)
+    let nightWon  = false;
+
+    const timeDisplay  = document.getElementById('time-display');
+
+    // Read night number from URL (?night=N)
+    const urlNight = parseInt(new URLSearchParams(window.location.search).get('night') || '1');
+    document.getElementById('night-display').textContent = `Night ${urlNight}`;
+
+    function triggerMorning() {
+        nightWon = true;
+
+        // Despawn all animatronics immediately
+        bonnieRoom   = null;
+        chicaRoom    = null;
+        bonniePath   = null;
+        foxyStage    = 0;
+        foxyProgress = 0;
+        foxyAtDoor   = false;
+        freddyRoom   = '09';
+        refreshAnimOverlays();
+
+        // Force cameras closed
+        if (cameraOpen) closeCamera();
+
+        // Night 5 — play the special ending video, then return to main menu
+        if (urlNight === 5) {
+            const endingDiv = document.getElementById('night5-ending');
+            const endingVid = document.getElementById('night5-video');
+            endingDiv.classList.add('show');
+            endingVid.play().catch(() => {});
+            endingVid.addEventListener('ended', () => {
+                window.location.href = '/';
+            });
+            return;
+        }
+
+        // Play 6 AM chime
+        const chime = new Audio('chime.mp3');
+        chime.volume = 0.75;
+        chime.play().catch(() => {});
+
+        // Fade in morning screen
+        const morningScreen = document.getElementById('morning-screen');
+        morningScreen.classList.add('show');
+        requestAnimationFrame(() => requestAnimationFrame(() => morningScreen.classList.add('fade')));
+
+        // Save and Continue button
+        document.getElementById('btn-save-continue').addEventListener('click', () => {
+            const nextNight = urlNight + 1;
+            localStorage.setItem('fnafSaveNight', nextNight);
+            window.location.href = '/';
+        });
+    }
+
+    function timeTick() {
+        if (paused || nightWon) return;
+        gameTime += 200;
+        if (gameTime >= NIGHT_DURATION_MS) {
+            gameTime = NIGHT_DURATION_MS;
+            timeDisplay.textContent = '6 AM';
+            triggerMorning();
+            return;
+        }
+        const hourIndex = Math.floor(gameTime / MS_PER_HOUR);
+        timeDisplay.textContent = HOUR_LABELS[Math.min(5, hourIndex)];
+    }
+
+    setInterval(timeTick, 200);
+
+    // ── Bonnie AI ────────────────────────────────────────────────
+    // ── Bonnie movement tables ────────────────────────────────────
+    // At Show Stage Bonnie picks a path (West or East) and commits to it.
+    // West path: Show Stage → Backstage/Dining → Supply Closet → West Hall → Left Door
+    // East path: Show Stage → Dining → East Hall → East Hall Corner → Right Door
+    /*  WEST path  (Bonnie ends up at the LEFT office vent)  */
+    const BONNIE_MOVES_WEST = {
+      '09': ['07'],            // Show Stage → Parts / Service
+      '07': ['03'],            // Parts / Svc → Party 3
+      '03': ['01'],            // Party 3     → Party 1
+      '01': ['05'],            // Party 1     → Left Vent
+      '05': ['DOOR_LEFT'],
+    };
+
+    /*  BONNIE — East (right-vent) route  */
+    const BONNIE_MOVES_EAST = {
+      '09': ['10'],            // Show Stage → Game Area
+      '10': ['04'],            // Game Area  → Party 4
+      '04': ['02'],            // Party 4    → Party 2
+      '02': ['06'],            // Party 2    → Right Vent
+      '06': ['DOOR_RIGHT'],
+    };
+
+
+    // AI level 1-20; FNAF rolls 1-20: move if roll ≤ AI level
+    // Night-1 Bonnie starts at 3, increases slightly over time
+    let bonnieAILevel = 3;
+    let bonnieRoom    = '09';
+    let bonniePath    = null; // 'west' | 'east' — chosen when leaving Show Stage
+
+    function positionOverlay(el, isVisible, side) {
+        // side: 'left' | 'right' | 'center'
+        if (!isVisible) { el.style.display = 'none'; return; }
+        el.style.display = 'block';
+        if (side === 'left')   { el.style.left = '25%'; el.style.transform = 'translateX(-50%)'; }
+        else if (side === 'right') { el.style.left = '75%'; el.style.transform = 'translateX(-50%)'; }
+        else                   { el.style.left = '50%'; el.style.transform = 'translateX(-50%)'; }
+    }
+
+    function refreshAnimOverlays () {
+        /* classic four */
+        const elB   = document.getElementById('bonnie-overlay');
+        const elC   = document.getElementById('chica-overlay');
+        const elF   = document.getElementById('foxy-overlay');
+        const elFr  = document.getElementById('freddy-overlay');
+
+        /* new characters — be sure the <img> tags exist in #cam-feed */
+        const elWF  = document.getElementById('wfreddy-overlay');  // <img id="wfreddy-overlay" …>
+        const elBB  = document.getElementById('bb-overlay');       // <img id="bb-overlay" …>
+        const elPP  = document.getElementById('puppet-overlay');   // <img id="puppet-overlay" …>
+
+        /* guard – keep old behaviour if core images missing */
+        if (!elB || !elC) return;
+
+        /* who is in the current camera? */
+        const bonnieHere  = cameraOpen && activeCam === bonnieRoom;
+        const chicaHere   = cameraOpen && activeCam === chicaRoom;
+        const foxyHere    = cameraOpen && activeCam === '1C' &&
+                            typeof foxyStage !== 'undefined' &&
+                            foxyStage >= 1 && foxyStage <= 2;
+        const freddyHere  = cameraOpen && activeCam === freddyRoom;
+
+        const wFreddyHere = cameraOpen && activeCam === wFreddyRoom;
+        const bbHere      = cameraOpen && activeCam === bbRoom;
+        const puppetHere  = cameraOpen && puppetLoose;   // Puppet appears on any cam once loose
+
+        /* positioning — keep Bonnie & Chica side-by-side if they share a frame */
+        const both = bonnieHere && chicaHere;
+        positionOverlay(elB,  bonnieHere, both ? 'left'  : 'center');
+        positionOverlay(elC,  chicaHere,  both ? 'right' : 'center');
+
+        /* single-sprite overlays */
+        if (elWF) positionOverlay(elWF, wFreddyHere, 'center');
+        if (elBB) positionOverlay(elBB, bbHere,      'center');
+        if (elPP) positionOverlay(elPP, puppetHere,  'center');
+        if (elF)  positionOverlay(elF,  foxyHere,    'center');
+        if (elFr) positionOverlay(elFr, freddyHere,  'center');
+    }
+
+    function updateBonnieCamera() { refreshAnimOverlays(); }
+
+    let gameOver = false;
+
+    // ── Jumpscare ──────────────────────────────────────────────────
+    function triggerJumpscare(killer) {
+        gameOver = true;
+        if (cameraOpen) closeCamera();
+
+        const jsOverlay   = document.getElementById('jumpscare-overlay');
+        const jsImg       = document.getElementById('jumpscare-img');
+        const deathScreen = document.getElementById('death-screen');
+        const deathText   = document.getElementById('death-text');
+
+        // Set the jumpscare image to match whoever killed the player
+        const KILLER_IMAGES = {
+          bonnie : 'bonnie.png',
+          chica  : 'chica.png',
+          foxy   : 'foxy.png',
+          freddy : 'freddy.png',      // classic Freddy
+          wfreddy: 'withered_freddy.png',     // Withered Freddy -- use a separate sprite
+          bb     : 'balloonboy.png',
+          puppet : 'puppet.png'
+        };
+        jsImg.src = KILLER_IMAGES[killer] || 'bonnie.png';
+
+        jsOverlay.classList.add('active');
+
+        const snd = new Audio('jumpscare.mp3');
+        snd.volume = 0.8;
+        snd.play().catch(() => {});
+
+        const DEATH_MESSAGES = {
+            bonnie: [
+                'YOU DIED TO COLT',
+                'HE LIKES TO TICKLE YOUR FANCY',
+                'HE ALSO LIKES JIGGLING HIS BELLY',
+            ],
+            chica: [
+                'YOU DIED TO LIAM',
+                'HE LIKES TO TRIP OF THE GUILTERS',
+                'HE THINK HE BILLY BADASS',
+            ],
+            foxy: [
+                'YOU DIED TO FANNY',
+                'BERRYSODA BERRYSODA BERRYSODA',
+                'GOON GOON ALL THE WAY',
+            ],
+            freddy: [
+                'YOU DIED TO STUART',
+                'HEROBRINE GOT TO HIM',
+                'STEWIE OH DOWIE OH STEWIE OKAY',
+            ],
+             wfreddy: [
+                'YOU DIED TO WITHERED STUART',
+                'HEROBRINE GOT TO HIM... AGAIN',
+                'STEWIE OH DOWIE OH STEWIE ALRIGHT',
+            ],
+            bb: [
+                'YOU DIED TO PALLET',
+                'STUART LEFT HER',
+                'WAIT... SHE ISNT EVEN REAL',
+            ],
+            puppet: [
+                'YOU DIED TO WATL',
+                'HE HAS A PUSSY AND DOESNT WANT TO TELL US',
+                'LOVES CHEWING UP SWITHACK AND SPITTING HIM OUT',
+            ],
+        };
+
+        // After 2.5s switch to death screen
+        setTimeout(() => {
+            jsImg.style.display = 'none';
+            deathScreen.classList.add('visible');
+
+            const messages = DEATH_MESSAGES[killer] || DEATH_MESSAGES.bonnie;
+            let i = 0;
+            function showNext() {
+                if (i >= messages.length) {
+                    window.location.href = '/';
+                    return;
+                }
+                deathText.textContent = messages[i++];
+                deathText.classList.add('visible');
+                setTimeout(() => {
+                    deathText.classList.remove('visible');
+                    setTimeout(showNext, 500);
+                }, 2600);
+            }
+            showNext();
+        }, 2500);
+    }
+
+    function bonnieTick() {
+        if (paused || powerOut || nightWon || gameOver) return;
+
+        // Scale AI level up gently as the night progresses (max 7)
+        bonnieAILevel = Math.min(7, 3 + Math.floor(gameTime / 90000));
+
+        // FNAF-style roll: move only if roll ≤ AI level
+        const roll = Math.floor(Math.random() * 20) + 1;
+        if (roll > bonnieAILevel) return;
+
+        // Pick East or West path the moment Bonnie leaves Show Stage
+        if (bonnieRoom === '09' && bonniePath === null) {
+            bonniePath = Math.random() < 0.5 ? 'west' : 'east';
+        }
+
+        // Door logic — left door (west path)
+        if (bonnieRoom === 'DOOR_LEFT') {
+            if (doorLeftOpen) {
+                triggerJumpscare('bonnie');
+            } else {
+                bonnieRoom  = '2B';
+                bonniePath  = null;
+                updateBonnieCamera();
+            }
+            return;
+        }
+
+        // Door logic — right door (east path)
+        if (bonnieRoom === 'DOOR_RIGHT') {
+            if (doorRightOpen) {
+                triggerJumpscare('bonnie');
+            } else {
+                bonnieRoom  = '4B';
+                bonniePath  = null;
+                updateBonnieCamera();
+            }
+            return;
+        }
+
+        const moves   = bonniePath === 'east' ? BONNIE_MOVES_EAST : BONNIE_MOVES_WEST;
+        const choices = moves[bonnieRoom];
+        if (!choices || choices.length === 0) return;
+
+        bonnieRoom = choices[Math.floor(Math.random() * choices.length)];
+        // If she drifted back to Show Stage, clear the path so she picks again next move
+        if (bonnieRoom === '09') bonniePath = null;
+        updateBonnieCamera();
+    }
+
+    // Global AI tick ≈ every 4.97 seconds (matches FNAF 1)
+    setInterval(bonnieTick, 4970);
+
+    // ── Chica AI ──────────────────────────────────────────────────
+    // Chica always takes the east path: Show Stage → Dining → Restrooms/East Hall → Right Door
+    /*  CHICA — always heads for the RIGHT office vent  */
+    const CHICA_MOVES = {
+      '09': ['10'],
+      '10': ['02'],
+      '02': ['04'],
+      '04': ['06'],
+      '06': ['DOOR_RIGHT'],
+    };
+
+    let chicaAILevel = 2;
+    let chicaRoom    = '09';
+
+    function updateChicaCamera() { refreshAnimOverlays(); }
+
+    function chicaTick() {
+        if (paused || powerOut || nightWon || gameOver) return;
+
+        chicaAILevel = Math.min(6, 2 + Math.floor(gameTime / 100000));
+
+        const roll = Math.floor(Math.random() * 20) + 1;
+        if (roll > chicaAILevel) return;
+
+        // Right door logic
+        if (chicaRoom === 'DOOR_RIGHT') {
+            if (doorRightOpen) {
+                triggerJumpscare('chica');
+            } else {
+                chicaRoom = '4B';
+                updateChicaCamera();
+            }
+            return;
+        }
+
+        const choices = CHICA_MOVES[chicaRoom];
+        if (!choices || choices.length === 0) return;
+
+        chicaRoom = choices[Math.floor(Math.random() * choices.length)];
+        updateChicaCamera();
+    }
+
+    // Slightly offset from Bonnie so they don't always tick together
+    setInterval(chicaTick, 5030);
+
+    // ── Foxy AI ───────────────────────────────────────────────────
+    // Foxy lives in Pirate Cove (cam 1C) and runs from there to the Left Door.
+    // Night 1: inactive. Night 2+: progressively more aggressive.
+    // Foxy advances through stages 0-3 as the player ignores cam 1C.
+    // Stage 0 = curtains closed, 1 = peeking, 2 = hanging out, 3 = running.
+    // Watching cam 1C pushes his progress back slightly.
+    // When he reaches stage 3 he sprints to the Left Door:
+    //   Left door open  → jumpscare
+    //   Left door closed → knock (−5% power) and retreat to stage 0
+    const FOXY_NIGHT_LEVELS = [0, 0, 3, 5, 7]; // index = night − 1, capped at last entry
+    let foxyAILevel = FOXY_NIGHT_LEVELS[Math.min(urlNight - 1, FOXY_NIGHT_LEVELS.length - 1)];
+    let foxyStage    = 0;
+    let foxyProgress = 0;
+    let foxyAtDoor   = false;
+
+    function refreshFoxyOverlay() {
+        const elF = document.getElementById('foxy-overlay');
+        if (!elF) return;
+        const foxyHere = cameraOpen && activeCam === '1C' && foxyStage >= 1 && foxyStage <= 2;
+        positionOverlay(elF, foxyHere, 'center');
+    }
+
+    function foxyTick() {
+        if (paused || nightWon || gameOver) return;
+        if (foxyAILevel === 0) return;   // Night 1 — Foxy inactive
+        if (foxyAtDoor)        return;   // Already sprinting, wait for setTimeout
+
+        const watching1C = cameraOpen && activeCam === '1C';
+
+        if (watching1C) {
+            // Watching Pirate Cove pushes Foxy back
+            foxyProgress = Math.max(0, foxyProgress - 3);
+        } else {
+            // FNAF-style roll — advance only if roll ≤ AI level
+            const roll = Math.floor(Math.random() * 20) + 1;
+            if (roll <= foxyAILevel) {
+                foxyProgress = Math.min(100, foxyProgress + Math.floor(Math.random() * 10) + 5);
+            }
+        }
+
+        // Map progress to stage
+        const newStage = foxyProgress < 25 ? 0 :
+                         foxyProgress < 50 ? 1 :
+                         foxyProgress < 75 ? 2 : 3;
+
+        if (newStage !== foxyStage) {
+            foxyStage = newStage;
+            refreshFoxyOverlay();
+
+            if (foxyStage === 3) {
+                // Foxy sprints to the Left Door
+                foxyAtDoor = true;
+                setTimeout(() => {
+                    if (gameOver || nightWon) { foxyAtDoor = false; return; }
+                    if (doorLeftOpen) {
+                        triggerJumpscare('foxy');
+                    } else {
+                        // Knocks — drains 5% power and retreats
+                        power        = Math.max(0, power - 5);
+                        foxyProgress = 0;
+                        foxyStage    = 0;
+                        foxyAtDoor   = false;
+                        refreshFoxyOverlay();
+                    }
+                }, 1500);
+            }
+        }
+    }
+
+    setInterval(foxyTick, 1000);
+
+    // ── Freddy AI ─────────────────────────────────────────────────
+    // Freddy follows a strict east path: Show Stage → Dining → Restrooms
+    //   → East Hall → East Hall Corner → Right Door
+    // He is spawned on all nights but has AI level 0 on nights 1 & 2
+    //   (present on stage, never moves).
+    // KEY mechanic: Freddy can ONLY move when the player is NOT watching
+    //   the camera he is currently on.
+    // At the Right Door with door open  → short laugh delay, then jumpscare.
+    // At the Right Door with door closed → stays put (player must hold door
+    //   until 6 AM; the door eats extra power).
+    /*  FREDDY — slow, methodical east-side route (CAM 09 → 08 → 06)  */
+    const FREDDY_PATH = {
+      '09': '08',          // Show Stage  → Main Hall
+      '08': '06',          // Main Hall   → Right Vent
+      '06': 'DOOR_RIGHT',  // Vent        → Office door
+    };
+    const FREDDY_NIGHT_LEVELS = [0, 0, 1, 3, 5]; // index = night − 1, cap at last
+    let freddyAILevel = FREDDY_NIGHT_LEVELS[Math.min(urlNight - 1, FREDDY_NIGHT_LEVELS.length - 1)];
+    let freddyRoom    = '09';
+    let freddyLaughing = false; // blocks re-entry while laugh timeout is live
+
+    function updateFreddyCamera() { refreshAnimOverlays(); }
+
+    function freddyTick() {
+        if (paused || powerOut || nightWon || gameOver) return;
+        if (freddyAILevel === 0)  return;  // Nights 1 & 2 — frozen on stage
+        if (freddyLaughing)       return;  // Mid-laugh sequence
+
+        // Freddy cannot move while the player is watching him
+        if (cameraOpen && activeCam === freddyRoom) return;
+
+        // FNAF roll
+        const roll = Math.floor(Math.random() * 20) + 1;
+        if (roll > freddyAILevel) return;
+
+        // At the Right Door
+        if (freddyRoom === 'DOOR_RIGHT') {
+            if (doorRightOpen) {
+                // Freddy laughs then strikes
+                freddyLaughing = true;
+                setTimeout(() => {
+                    if (gameOver || nightWon) { freddyLaughing = false; return; }
+                    triggerJumpscare('freddy');
+                }, 1200);
+            }
+            // If door is closed Freddy stays — the player must outlast him
+            return;
+        }
+
+        // Advance one step along the path
+        const next = FREDDY_PATH[freddyRoom];
+        if (!next) return;
+        freddyRoom = next;
+        updateFreddyCamera();
+    }
+
+    // Slower base tick than Bonnie/Chica — Freddy is methodical
+    setInterval(freddyTick, 6100);
+
+    // ── Light button ───────────────────────────────────────────────
+    const btnLight   = document.getElementById('btn-light');
+    const lightFlash = document.getElementById('light-flash');
+    const doorPeek   = document.getElementById('door-peek');
+    let lightCooldown = false;
+
+    function updateLightButton() {
+        const atDoor = (pos === 0 || pos === 2) && !cameraOpen && !gameOver;
+        btnLight.classList.toggle('visible', atDoor);
+    }
+
+    btnLight.addEventListener('click', () => {
+        if (lightCooldown || gameOver) return;
+        // Light only works if the facing door is open
+        if (pos === 0 && !doorLeftOpen)  return;
+        if (pos === 2 && !doorRightOpen) return;
+
+        // Flash on
+        lightFlash.classList.add('on');
+
+        // Show whoever is at the facing door
+        const doorPeekImg = document.getElementById('door-peek-img');
+        if (pos === 0 && (bonnieRoom === 'DOOR_LEFT' || foxyAtDoor)) {
+            doorPeekImg.src = bonnieRoom === 'DOOR_LEFT' ? 'bonnie.png' : 'foxy.png';
+            doorPeek.className = 'left';
+            doorPeek.style.display = 'block';
+        } else if (pos === 2 && (chicaRoom === 'DOOR_RIGHT' || bonnieRoom === 'DOOR_RIGHT' || freddyRoom === 'DOOR_RIGHT')) {
+            doorPeekImg.src = chicaRoom === 'DOOR_RIGHT' ? 'chica.png'
+                            : bonnieRoom === 'DOOR_RIGHT' ? 'bonnie.png'
+                            : 'freddy.png';
+            doorPeek.className = 'right';
+            doorPeek.style.display = 'block';
+        }
+
+        // Flash off after 0.5s
+        setTimeout(() => {
+            lightFlash.classList.remove('on');
+            doorPeek.style.display = 'none';
+        }, 500);
+
+        // 2-second cooldown — power drain lasts the full cooldown then drops
+        lightCooldown = true;
+        lightOn = true;
+        updatePowerUsage();
+        btnLight.classList.add('cooldown');
+        setTimeout(() => {
+            lightCooldown = false;
+            lightOn = false;
+            updatePowerUsage();
+            btnLight.classList.remove('cooldown');
+        }, 2000);
+    });
+
+    // ── Ambient flicker ──────────────────────────────────────────
+    const overlay = document.getElementById('dark-overlay');
+    function flicker() {
+        if (!paused && Math.random() < 0.06) {
+            overlay.style.opacity = (0.45 + Math.random() * 0.45).toString();
+            setTimeout(() => { overlay.style.opacity = '1'; }, 50 + Math.random() * 100);
+        }
+        setTimeout(flicker, 1200 + Math.random() * 3000);
+    }
+    flicker();
+    /* ============================================================
+       █ NEW AI LEVELS + Withered Freddy, Balloon Boy & Puppet █
+       paste once after urlNight, before the old “── Bonnie AI” banner
+       ============================================================ */
+
+    /* ---------- Difficulty curves (nights 1-5) ------------------ */
+    const AI_LEVELS = {
+      bonnie : [ 3,  5,  8, 12, 15 ],
+      chica  : [ 2,  4,  7, 11, 14 ],
+      foxy   : [ 0,  3,  6, 10, 13 ],
+      freddy : [ 0,  2,  5,  9, 12 ],   // reused by Withered Freddy
+      bb     : [ 1,  3,  6,  8, 10 ],
+    };
+
+    /* =============================================================
+       WITHERED FREDDY  – shortened West-hall route
+       =============================================================*/
+    /*  WITHERED FREDDY — Show Stage → Game Area → Right Vent → Office door  */
+    const WF_PATH = {
+      '09': '08',              // Show Stage → Main Hall
+      '08': '10',              // Main Hall  → Game Area
+      '10': '06',              // Game Area  → Right Vent
+      '06': 'DOOR_RIGHT',
+    };
+    let wFreddyRoom = '09';
+
+    function wFreddyTick() {
+      if (paused || powerOut || nightWon || gameOver) return;
+      const lvl = AI_LEVELS.freddy[urlNight-1];
+      if (lvl===0 || (cameraOpen && activeCam===wFreddyRoom) || Math.random()*20>lvl) return;
+
+      if (wFreddyRoom==='DOOR_RIGHT') {
+        if (doorRightOpen) triggerJumpscare('freddy');
+        return;
+      }
+      wFreddyRoom = WF_PATH[wFreddyRoom] || wFreddyRoom;
+    }
+    setInterval(wFreddyTick, 4800);
+
+    /* =============================================================
+       BALLOON BOY – Game Area → Right Vent → disables doors
+       =============================================================*/
+    const BB_PATH = {
+      '10': '06',
+      '06' : 'DOOR_RIGHT',
+    };
+    let bbRoom='1B', bbActive=false;
+
+    function bbTick(){
+      if (paused||powerOut||nightWon||gameOver||bbActive) return;
+      const lvl=AI_LEVELS.bb[urlNight-1];
+      if(Math.random()*20>lvl) return;
+
+      if(bbRoom==='DOOR_RIGHT'){
+        if(doorRightOpen){
+          bbActive=true;
+          doorLeftOpen=doorRightOpen=true;   // player loses door control
+          updatePowerUsage();
+        }
+        return;
+      }
+      bbRoom = BB_PATH[bbRoom] || bbRoom;
+    }
+    setInterval(bbTick,5300);
+
+    /* =============================================================
+       THE PUPPET – music-box timer on CAM 6 (Kitchen placeholder)
+       =============================================================*/
+    let musicBox=100, puppetLoose=false;
+    const BOX_DRAIN = [0.03,0.05,0.07,0.09,0.11][urlNight-1];
+
+    function musicBoxTick(){
+      if(paused||powerOut||nightWon||gameOver||puppetLoose) return;
+      if(cameraOpen && activeCam==='6') return;     // player is “winding”
+      musicBox=Math.max(0,musicBox-BOX_DRAIN);
+      if(musicBox===0){
+        puppetLoose=true;
+        setTimeout(()=>triggerJumpscare('puppet'),4500);
+      }
+    }
+    setInterval(musicBoxTick,200);
+    function windMusicBox(){ musicBox=100; }        // call from a button on CAM 6
+
+    /* =============================================================
+       OVERLAY SUPPORT (add once)
+       =============================================================*/
+    const elWF = document.getElementById('freddy-overlay');   // reuse sprite
+    const elBB = document.createElement('img');
+    elBB.id='bb-overlay';     elBB.src='balloonboy.png';  elBB.style.display='none';
+    const elPP = document.createElement('img');
+    elPP.id='puppet-overlay'; elPP.src='puppet.png';      elPP.style.display='none';
+    document.getElementById('cam-feed').append(elBB,elPP);
+
+    const _oldRefresh = refreshAnimOverlays;          // keep your existing function
+    refreshAnimOverlays = function(){
+      _oldRefresh();
+      const bbHere   = cameraOpen && activeCam===bbRoom;
+      const wfHere   = cameraOpen && activeCam===wFreddyRoom;
+      const ppHere   = cameraOpen && puppetLoose && cameraOpen;
+      positionOverlay(elWF,wfHere,'center');
+      positionOverlay(elBB,bbHere,'center');
+      positionOverlay(elPP,ppHere,'center');
+    };
+
+    /* =============================================================
+       Jumpscare sprite map – add the two new keys
+       =============================================================*/
+    Object.assign(KILLER_IMAGES,{
+      bb:'balloonboy.png',
+      puppet:'puppet.png'
+    });
+</script>
+</body>
+</html>
